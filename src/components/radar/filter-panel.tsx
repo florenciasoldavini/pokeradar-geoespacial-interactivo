@@ -42,7 +42,7 @@ export function FilterPanel({
         aria-expanded={open}
         aria-label="Filtros"
         aria-controls="filter-panel"
-        className="flex h-10 cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-panel/80 px-4 text-sm backdrop-blur-md transition-colors hover:bg-white/10"
+        className="flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-panel/80 px-3 text-sm backdrop-blur-md transition-colors hover:bg-white/10 sm:h-10 sm:px-4"
       >
         <FilterIcon className="size-4" />
         <span className="hidden sm:inline">Filtros</span>
@@ -71,7 +71,7 @@ export function FilterPanel({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -8 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="absolute top-12 right-0 z-30 w-[min(22rem,calc(100vw-2rem))] origin-top-right rounded-2xl border border-white/10 bg-panel/95 p-4 shadow-2xl backdrop-blur-xl"
+            className="absolute top-11 right-0 sm:top-12 z-30 w-[min(22rem,calc(100vw-2rem))] origin-top-right rounded-2xl border border-white/10 bg-panel/95 p-4 shadow-2xl backdrop-blur-xl"
           >
             <div className="-mt-1 mb-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold">Filtros</h2>

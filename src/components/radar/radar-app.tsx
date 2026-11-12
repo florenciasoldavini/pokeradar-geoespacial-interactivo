@@ -160,25 +160,31 @@ export function RadarApp({ zones, spawnsByZone, weatherVisitors }: RadarAppProps
         onSelectPokemon={(id) => selectPokemon(radarSpawns.find((s) => s.id === id))}
       />
 
-      <header className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4 sm:p-6">
-        <div className="flex flex-col items-start gap-2">
-          <div className="pointer-events-auto rounded-2xl border border-white/10 bg-panel/80 px-4 py-3 backdrop-blur-md">
-            <h1 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-              <span className="relative flex size-2.5">
-                <span className="absolute inset-0 animate-ping rounded-full bg-radar opacity-75" />
-                <span className="relative size-2.5 rounded-full bg-radar" />
-              </span>
-              PokéRadar
-            </h1>
-            <p className="font-mono text-[11px] tracking-wider text-white/50 uppercase">
-              Argentina · {zones.length} biomas
-              {weather.status === "ready" && " · clima en vivo"}
-            </p>
-          </div>
+      {/*
+        Grid so brand card and team dock always share one column (same width):
+        mobile → [brand | controls] / [team | –], column 1 takes what's left;
+        desktop → column 1 sizes to its widest card, controls pinned right.
+      */}
+      <header className="pointer-events-none absolute inset-x-0 top-0 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 p-4 sm:grid-cols-[auto_1fr_auto] sm:gap-3 sm:p-6">
+        <div className="pointer-events-auto col-start-1 row-start-1 rounded-2xl border border-white/10 bg-panel/80 px-4 py-3 backdrop-blur-md">
+          <h1 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+            <span className="relative flex size-2.5">
+              <span className="absolute inset-0 animate-ping rounded-full bg-radar opacity-75" />
+              <span className="relative size-2.5 rounded-full bg-radar" />
+            </span>
+            PokéRadar
+          </h1>
+          <p className="font-mono text-[11px] whitespace-nowrap text-white/50 uppercase sm:tracking-wider">
+            Argentina
+            <span className="hidden sm:inline"> · {zones.length} biomas</span>
+            {weather.status === "ready" && " · clima en vivo"}
+          </p>
+        </div>
+        <div className="col-start-1 row-start-2">
           <TeamDock team={team} onSelect={focusTeamMember} />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="col-start-2 row-start-1 flex items-center gap-2 justify-self-end sm:col-start-3">
           <SoundToggle enabled={soundOn} onToggle={() => setSoundOn((on) => !on)} />
           <FilterPanel
             open={filtersOpen}

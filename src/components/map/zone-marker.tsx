@@ -77,7 +77,11 @@ export function ZoneMarker({
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
               transition={{ type: "spring", stiffness: 500, damping: 22 }}
-              className="absolute -top-2.5 -right-3 grid h-4 min-w-4 place-items-center rounded-full bg-radar px-1 font-mono text-[10px] font-semibold text-radar-bg tabular-nums"
+              // leading-none: markers inherit MapLibre's `font: 12px/20px`, and
+              // that 20px line box pushed the digit off-center in a 16px badge.
+              className={`absolute -top-2.5 -right-3 flex h-4 items-center justify-center rounded-full bg-radar font-mono text-[10px] leading-none font-semibold text-radar-bg tabular-nums ${
+                matchCount < 10 ? "w-4" : "px-1"
+              }`}
             >
               {matchCount}
             </motion.span>

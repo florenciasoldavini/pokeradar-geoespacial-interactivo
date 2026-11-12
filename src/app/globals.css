@@ -33,7 +33,10 @@ body {
   filter: invert(1);
 }
 
-.maplibregl-ctrl.maplibregl-ctrl-attrib {
+/* Extra .maplibregl-map so it beats MapLibre's own
+   `.maplibregl-ctrl-attrib.maplibregl-compact { background: #fff }`,
+   which has equal specificity and loads after this file. */
+.maplibregl-map .maplibregl-ctrl.maplibregl-ctrl-attrib {
   background: rgb(13 19 27 / 0.85);
   color: rgb(255 255 255 / 0.5);
   backdrop-filter: blur(8px);

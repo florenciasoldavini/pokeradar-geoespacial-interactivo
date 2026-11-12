@@ -16,7 +16,7 @@ export function TeamDock({ team, onSelect }: TeamDockProps) {
   return (
     <section
       aria-label="Equipo de expedición"
-      className="pointer-events-auto rounded-2xl border border-white/10 bg-panel/80 px-3 py-2.5 backdrop-blur-md"
+      className="pointer-events-auto rounded-2xl border border-white/10 bg-panel/80 px-4 py-2.5 backdrop-blur-md"
     >
       <p className="font-mono text-[10px] tracking-wider text-white/45 uppercase">
         Equipo{" "}
@@ -24,15 +24,17 @@ export function TeamDock({ team, onSelect }: TeamDockProps) {
           {team.length}/{TEAM_SIZE}
         </span>
       </p>
-      <ol className="mt-1.5 flex gap-1.5">
+      {/* Fluid square slots: they share whatever width the column has
+          (narrow phones) and cap at 36px (desktop). */}
+      <ol className="mt-1.5 flex justify-between gap-1 sm:gap-1.5">
         {Array.from({ length: TEAM_SIZE }, (_, slot) => {
           const member = team[slot];
           const color = member?.types[0] ? TYPE_META[member.types[0]].color : undefined;
           return (
-            <li key={slot} className="relative size-9">
+            <li key={slot} className="relative aspect-square max-w-9 min-w-0 flex-1 sm:min-w-9">
               {/* Empty slot: a faint Pokéball outline. */}
               <span className="absolute inset-0 grid place-items-center rounded-full border border-dashed border-white/12 text-white/12">
-                <PokeballIcon className="size-4" />
+                <PokeballIcon className="size-[45%]" />
               </span>
               <AnimatePresence>
                 {member && (
@@ -61,7 +63,7 @@ export function TeamDock({ team, onSelect }: TeamDockProps) {
                         width={28}
                         height={28}
                         unoptimized
-                        className="size-7 object-contain [image-rendering:pixelated]"
+                        className="size-[78%] object-contain [image-rendering:pixelated]"
                       />
                     )}
                   </motion.button>

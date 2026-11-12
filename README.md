@@ -2,7 +2,7 @@
 
 Un radar geoespacial para descubrir Pokémon recorriendo los biomas reales de Argentina. Cada zona del mapa representa un hábitat de la PokéAPI, y el **clima en vivo** de ese lugar decide qué tipos se potencian y qué visitantes aparecen.
 
-**Demo:** _(link de Vercel)_ · **Stack:** Next.js 16 (App Router) · TypeScript estricto · Tailwind CSS v4 · MapLibre GL + OpenFreeMap · Framer Motion · PokéAPI · Open-Meteo
+**Demo:** https://pokeradar-geoespacial-interactivo.vercel.app · **Stack:** Next.js 16 (App Router) · TypeScript estricto · Tailwind CSS v4 · MapLibre GL + OpenFreeMap · Framer Motion · PokéAPI · Open-Meteo
 
 ---
 

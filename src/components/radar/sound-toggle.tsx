@@ -17,7 +17,7 @@ export function SoundToggle({ enabled, onToggle }: SoundToggleProps) {
         enabled ? "Silenciar el grito al capturar" : "Activar el grito al capturar"
       }
       title={enabled ? "Grito al capturar: activado" : "Grito al capturar: silenciado"}
-      className={`pointer-events-auto grid size-10 cursor-pointer place-items-center rounded-full border border-white/10 bg-panel/80 backdrop-blur-md transition-colors hover:bg-white/10 ${
+      className={`pointer-events-auto grid size-9 shrink-0 cursor-pointer sm:size-10 place-items-center rounded-full border border-white/10 bg-panel/80 backdrop-blur-md transition-colors hover:bg-white/10 ${
         enabled ? "text-white" : "text-white/40"
       }`}
     >
