@@ -1,10 +1,10 @@
 "use client";
 
 import { Sprite } from "@/components/pokemon/sprite";
-import { TypeBadge } from "@/components/pokemon/type-badge";
+import { TypeIcon } from "@/components/pokemon/type-icon";
 import { TEAM_SIZE, type TeamMember } from "@/hooks/use-team";
 import { plural } from "@/lib/format";
-import { TYPE_META } from "@/lib/pokemon-types";
+import { TYPE_META, typeIconUrl } from "@/lib/pokemon-types";
 import type { Zone } from "@/lib/zones";
 import { isSharedWeakness, teamThreats } from "@/lib/team-coverage";
 import { CART_LEGEND, Cartridge, Lcd, keyClass, type Placement } from "@/components/device/parts";
@@ -25,7 +25,6 @@ type TeamPanelProps = {
  */
 export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRelease, onClose }: TeamPanelProps) {
   const threats = teamThreats(team);
-  const shared = threats.filter(isSharedWeakness);
   const typesOnTeam = [...new Set(team.flatMap((m) => m.types))];
 
   return (
@@ -73,11 +72,14 @@ export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRel
                       />
                     )}
                     <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold text-white">{member.name}</span>
-                      <span className="block truncate text-xs text-white/60">
-                        {member.types.map((t) => TYPE_META[t].label).join(" / ")}
-                        {zone && ` · ${zone.name}`}
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className="truncate text-sm font-semibold text-white">{member.name}</span>
+                        {/* Icons only: the damage grid below names every type. */}
+                        {member.types.map((t) => (
+                          <TypeIcon key={t} type={t} size={14} />
+                        ))}
                       </span>
+                      {zone && <span className="block truncate text-xs text-white/60">{zone.name}</span>}
                     </span>
                   </button>
                   <button
@@ -93,12 +95,20 @@ export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRel
             })}
           </ul>
 
+          {/* Icons only: the grid below names every type. */}
+          <div className="flex shrink-0 flex-wrap items-center gap-1.5 px-0.5">
+            <span className="text-xs text-white/60">Tipos en el equipo ({typesOnTeam.length}/18):</span>
+            {typesOnTeam.map((type) => (
+              <TypeIcon key={type} type={type} size={18} />
+            ))}
+          </div>
+
           <div className="mt-1 flex shrink-0 items-baseline justify-between px-0.5">
             <h3 className={CART_LEGEND}>Daño recibido por tipo</h3>
             <span className="text-[11px] text-white/55">▲ débiles · ▼ resisten</span>
           </div>
           <Lcd className="shrink-0 p-2">
-            <ul className="grid grid-cols-3 gap-1 max-lg:grid-cols-6 max-[420px]:grid-cols-3">
+            <ul className="grid grid-cols-3 gap-1">
               {threats.map((threat) => {
                 const danger = isSharedWeakness(threat);
                 const net = threat.weak - threat.resist;
@@ -112,7 +122,13 @@ export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRel
                     }`}
                   >
                     <span className="flex items-center gap-1 text-[11px] leading-tight" style={{ color }}>
-                      <span className="size-1.5 shrink-0 rounded-full bg-current" aria-hidden />
+                      <Sprite
+                        src={typeIconUrl(threat.type)}
+                        alt=""
+                        width={14}
+                        height={14}
+                        className="size-3.5 shrink-0 rounded-full"
+                      />
                       <span className="truncate">{label}</span>
                     </span>
                     <span className="dex-font-lcd mt-0.5 flex gap-1.5 text-xs leading-none tabular-nums">
@@ -127,26 +143,6 @@ export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRel
             </ul>
           </Lcd>
 
-          <div className="shrink-0 px-0.5 text-[13px] leading-snug" role="status">
-            {shared.length > 0 ? (
-              <p className="text-white/80">
-                <span className="dex-font-lcd text-red-300 uppercase">▲ Punto débil: </span>
-                {shared.map((t) => TYPE_META[t.type].label).join(", ")}. Ninguno de tus Pokémon lo resiste: buscá uno
-                que lo aguante.
-              </p>
-            ) : (
-              <p className="text-white/80">
-                <span className="dex-font-lcd text-radar uppercase">● Equilibrado: </span>
-                ningún tipo golpea fuerte a dos o más sin que alguien lo resista.
-              </p>
-            )}
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs text-white/60">Tipos en el equipo ({typesOnTeam.length}/18):</span>
-              {typesOnTeam.map((type) => (
-                <TypeBadge key={type} type={type} />
-              ))}
-            </div>
-          </div>
         </>
       )}
     </Cartridge>

@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
+import { Sprite } from "@/components/pokemon/sprite";
 import { RangeSlider } from "@/components/ui/range-slider";
 import {
   DEFAULT_FILTERS,
@@ -11,7 +12,7 @@ import {
   type RadarFilters,
 } from "@/lib/filters";
 import { plural } from "@/lib/format";
-import { POKEMON_TYPES, TYPE_META } from "@/lib/pokemon-types";
+import { POKEMON_TYPES, TYPE_META, typeIconUrl } from "@/lib/pokemon-types";
 import { CART_LEGEND, Cartridge, GREEN_KEY, Lcd, keyClass, type Placement } from "@/components/device/parts";
 
 type FilterPanelProps = {
@@ -85,7 +86,7 @@ export function FilterPanel({ placement, screenHeight, filters, onChange, matchC
       </Lcd>
 
       <Section title="Tipo" aside={filters.types.length > 0 ? plural(filters.types.length, "elegido") : "todos"}>
-        <div className="grid grid-cols-3 gap-1.5 max-lg:grid-cols-4">
+        <div className="grid grid-cols-3 gap-1.5">
           {POKEMON_TYPES.map((type) => {
             const selected = filters.types.includes(type);
             const { label, color } = TYPE_META[type];
@@ -95,7 +96,7 @@ export function FilterPanel({ placement, screenHeight, filters, onChange, matchC
                 type="button"
                 aria-pressed={selected}
                 onClick={() => onChange({ ...filters, types: toggled(filters.types, type) })}
-                className={`${keyClass(selected)} flex h-8 min-w-0 items-center gap-1.5 rounded-[9px] px-2 text-left text-[12.5px] max-lg:px-1.5 max-lg:text-xs`}
+                className={`${keyClass(selected)} flex h-8 min-w-0 items-center gap-1.5 rounded-[9px] px-2 text-left text-[12.5px]`}
                 style={
                   selected
                     ? ({
@@ -105,10 +106,13 @@ export function FilterPanel({ placement, screenHeight, filters, onChange, matchC
                     : undefined
                 }
               >
-                <span
-                  aria-hidden
-                  className="size-[7px] shrink-0 rounded-full shadow-[0_0_0_1px_rgb(0_0_0/0.5)]"
-                  style={{ backgroundColor: color, boxShadow: selected ? `0 0 6px ${color}` : undefined }}
+                <Sprite
+                  src={typeIconUrl(type)}
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="size-4 shrink-0 rounded-full"
+                  style={{ boxShadow: selected ? `0 0 6px ${color}` : undefined }}
                 />
                 <span className="truncate">{label}</span>
               </button>

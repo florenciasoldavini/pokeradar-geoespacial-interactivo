@@ -46,6 +46,33 @@ export const TYPE_META: Record<PokemonType, { label: string; color: string }> = 
   fairy: { label: "Hada", color: "#d685ad" },
 };
 
+/** PokéAPI's type ids, which don't follow the order above. */
+const TYPE_ID: Record<PokemonType, number> = {
+  normal: 1,
+  fighting: 2,
+  flying: 3,
+  poison: 4,
+  ground: 5,
+  rock: 6,
+  bug: 7,
+  ghost: 8,
+  steel: 9,
+  fire: 10,
+  water: 11,
+  grass: 12,
+  electric: 13,
+  psychic: 14,
+  ice: 15,
+  dragon: 16,
+  dark: 17,
+  fairy: 18,
+};
+
+/** The type's round symbol (Sword & Shield style) from PokéAPI's sprite repo. */
+export function typeIconUrl(type: PokemonType): string {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-viii/sword-shield/small/${TYPE_ID[type]}.png`;
+}
+
 /** Habitat data in PokéAPI only covers generations I–III (#1–#386). */
 export function generationOf(id: number): 1 | 2 | 3 {
   if (id <= 151) return 1;
