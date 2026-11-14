@@ -152,7 +152,7 @@ function StatusLcd({ readout, message }: { readout: Readout; message: LidProps["
       <p className="dex-font-lcd truncate text-[10.5px] leading-[15px] text-radar/65 uppercase lg:text-[11px]">
         {readout.trail.map((step, i) => (
           <span key={`${i}:${step}`}>
-            {i > 0 && <span className="text-radar/35"> › </span>}
+            {i > 0 && <span className="text-radar/60"> › </span>}
             {step}
           </span>
         ))}
@@ -300,7 +300,7 @@ function ZoneRocker({ index, count, onStep }: { index: number; count: number; on
         aria-label={index >= 0 ? `Zona ${index + 1} de ${count}` : "Ninguna zona elegida"}
       >
         <span className="dex-lcd-text">{index >= 0 ? pad2(index + 1) : "--"}</span>
-        <span className="text-[11px] text-radar/50">/{pad2(count)}</span>
+        <span className="text-[11px] text-radar/75">/{pad2(count)}</span>
       </p>
       <button
         type="button"

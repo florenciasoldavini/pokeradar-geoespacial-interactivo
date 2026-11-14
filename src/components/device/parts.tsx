@@ -27,7 +27,7 @@ export const GREEN_KEY = `${KEY_BASE} bg-[linear-gradient(180deg,#7af0b4,#3fd68d
 
 /** Engraved legend on the red plastic. */
 export const LEGEND =
-  "dex-font-display text-[10px] font-semibold tracking-[0.14em] text-white/75 uppercase [text-shadow:0_1px_0_rgb(0_0_0/0.45)]";
+  "dex-font-display text-[10px] font-semibold tracking-[0.14em] text-white/90 uppercase [text-shadow:0_1px_0_rgb(0_0_0/0.45)]";
 
 /** Section legend inside a cartridge. */
 export const CART_LEGEND = "dex-font-display text-[11px] font-semibold tracking-[0.14em] text-white/55 uppercase";
@@ -217,7 +217,7 @@ function CartLabel({
           {label}
         </span>
         {aside && (
-          <span className="dex-font-lcd ml-auto shrink-0 text-xs leading-none text-[#5e564e]">{aside}</span>
+          <span className="dex-font-lcd ml-auto shrink-0 text-xs leading-none text-[#4a433c]">{aside}</span>
         )}
       </span>
       <button
