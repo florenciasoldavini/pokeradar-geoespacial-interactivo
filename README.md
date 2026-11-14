@@ -41,9 +41,10 @@ La interfaz es una **Pokédex de bolsillo** armada alrededor del mapa: una tapa 
 
 **Decisiones de UX**
 
-- `Esc` retrocede un nivel (manual → panel → Pokémon → zona → país). Atajos: `N`/`S` zona al norte/sur, `P` próximo potenciado, `F` filtros, `E` equipo, `M` grito al capturar, `?` manual; en la ficha, `C` capturar, `G` grito y `[` `]` Pokémon anterior/siguiente.
+- `Esc` retrocede un nivel (manual → panel → Pokémon → zona → país). Atajos: `N`/`S` zona al norte/sur, `P` próximo potenciado, `F` filtros, `E` equipo, `M` sonido, `?` manual; en la ficha, `C` capturar, `G` grito y `[` `]` Pokémon anterior/siguiente.
 - Usuarios con *reducir movimiento* activado reciben saltos de cámara en lugar de vuelos y un radar estático.
 - El grito del Pokémon suena **al capturarlo** (y a demanda desde el panel). Al principio sonaba cada vez que se seleccionaba uno; al probarlo resultó molesto y lo moví al momento de la captura, donde funciona como recompensa.
+- La Pokédex tiene **sonidos propios**, sintetizados con Web Audio (sin archivos): un *ping* de sonar al elegir una zona, un arpegio al elegir un Pokémon, un barrido que sube o baja al abrir o cerrar un panel y un *tic* en las demás teclas. Siguen los cambios de estado y no los clics, así los atajos de teclado suenan igual; no suenan hasta la primera interacción y la tecla de sonido (`M`) los silencia junto con el grito.
 - Mobile: los paneles son *bottom sheets* que se cierran arrastrándolas hacia abajo (la ficha también se expande hacia arriba). En desktop son paneles laterales —desde 1280 px la zona y la ficha conviven lado a lado— y la cámara deja espacio para que no tapen al Pokémon.
 
 ---

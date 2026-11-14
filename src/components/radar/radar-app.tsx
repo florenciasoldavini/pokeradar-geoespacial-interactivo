@@ -282,7 +282,7 @@ export function RadarApp({ zones, spawnsByZone, weatherVisitors }: RadarAppProps
     if (soundOn && selectedSpawn.cry) playCry(selectedSpawn.id, selectedSpawn.cry);
     const count = `${Math.min(team.length + 1, TEAM_SIZE)}/${TEAM_SIZE}`;
     // Muted captures say so, or a silent catch reads as broken sound.
-    flash(`¡${selectedSpawn.name} capturado! · ${count}${soundOn ? "" : " · grito silenciado (M)"}`);
+    flash(`¡${selectedSpawn.name} capturado! · ${count}${soundOn ? "" : " · sonido silenciado (M)"}`);
   }
 
   function releaseMember(id: number) {
@@ -293,7 +293,7 @@ export function RadarApp({ zones, spawnsByZone, weatherVisitors }: RadarAppProps
 
   function toggleSound() {
     setSoundOn((on) => !on);
-    flash(soundOn ? "Grito al capturar: silenciado" : "Grito al capturar: activado");
+    flash(soundOn ? "Sonido: silenciado" : "Sonido: activado");
   }
 
   function closeManual() {

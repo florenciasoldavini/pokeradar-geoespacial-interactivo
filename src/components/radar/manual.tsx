@@ -29,7 +29,7 @@ const SHORTCUTS: readonly (readonly [string, string])[] = [
   ["C", "Capturar"],
   ["G", "Grito"],
   ["[ ]", "Pokémon anterior / siguiente"],
-  ["M", "Grito al capturar"],
+  ["M", "Sonido"],
   ["Esc", "Volver un paso"],
   ["?", "Este manual"],
 ];

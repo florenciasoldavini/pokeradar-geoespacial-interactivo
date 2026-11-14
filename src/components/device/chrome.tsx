@@ -85,8 +85,8 @@ export function Lid(props: LidProps) {
           type="button"
           onClick={props.onToggleSound}
           aria-pressed={props.soundOn}
-          aria-label="Grito al capturar"
-          title={props.soundOn ? "Grito al capturar: activado (M)" : "Grito al capturar: silenciado (M)"}
+          aria-label="Sonido"
+          title={props.soundOn ? "Sonido: activado (M)" : "Sonido: silenciado (M)"}
           className={`${keyClass(props.soundOn)} relative grid size-10 place-items-center rounded-xl`}
         >
           <SpeakerIcon muted={!props.soundOn} className="size-[18px]" />
