@@ -1,9 +1,10 @@
 "use client";
 
-import { Sprite } from "@/components/pokemon/sprite";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { Sprite } from "@/components/pokemon/sprite";
 import { TypeBadge } from "@/components/pokemon/type-badge";
+import { TypeIcon } from "@/components/pokemon/type-icon";
 import { PokeballIcon } from "@/components/ui/icons";
 import { WeatherIcon } from "@/components/weather/weather-icon";
 import { usePlayingCry } from "@/hooks/use-playing-cry";
@@ -14,9 +15,10 @@ import { playCry } from "@/lib/cry-player";
 import { STAT_LABELS, type PokemonDetail } from "@/lib/pokemon-detail";
 import { TYPE_META, generationOf } from "@/lib/pokemon-types";
 import type { RadarSpawn } from "@/lib/spawn";
+import { defensiveMatchups } from "@/lib/type-chart";
 import { WEATHER_META } from "@/lib/weather";
 import type { Zone } from "@/lib/zones";
-import { CART_LEGEND, Cartridge, GREEN_KEY, Lcd, WaveIcon, keyClass, type Placement } from "@/components/device/parts";
+import { BoostMark, CART_LEGEND, Cartridge, GREEN_KEY, Lcd, WaveIcon, keyClass, type Placement } from "@/components/device/parts";
 
 export type TeamStatus = "available" | "in-team" | "full";
 
@@ -114,9 +116,13 @@ export function PokemonDrawer(props: PokemonDrawerProps) {
       </div>
 
       {detail.status === "error" ? (
-        <Lcd className="shrink-0">
-          <SignalLost onRetry={detail.retry} />
-        </Lcd>
+        <>
+          <Lcd className="shrink-0">
+            <SignalLost onRetry={detail.retry} />
+          </Lcd>
+          {/* Computed from the types the radar already has, so it survives a failed fetch. */}
+          <Matchups types={spawn.types} />
+        </>
       ) : (
         <>
           <Lcd className="shrink-0 px-3.5 py-3">
@@ -134,6 +140,7 @@ export function PokemonDrawer(props: PokemonDrawerProps) {
             )}
           </Lcd>
           <Stats key={data?.id ?? "loading"} data={data} />
+          <Matchups types={spawn.types} />
           <Facts data={data} />
         </>
       )}
@@ -235,8 +242,12 @@ function WeatherLine({ spawn, zone }: { spawn: RadarSpawn; zone: Zone }) {
   const helped = spawn.types.filter((type) => weather.boosts.includes(type)).map((type) => TYPE_META[type].label);
   return (
     <p className="mt-2.5 flex items-start gap-2 border-t border-radar/15 pt-2 text-[12.5px] leading-snug text-white/80">
-      <span style={{ color: weather.color }} className="mt-px shrink-0">
-        <WeatherIcon kind={spawn.boostedBy} className="size-4" />
+      {/* Same order as the map badge: the weather, then the boost it gives. */}
+      <span className="mt-px flex shrink-0 items-center gap-0.5">
+        <span style={{ color: weather.color }} className="flex">
+          <WeatherIcon kind={spawn.boostedBy} className="size-4" />
+        </span>
+        {!spawn.isVisitor && <BoostMark className="size-3.5" />}
       </span>
       {spawn.isVisitor ? (
         <span>
@@ -393,6 +404,52 @@ function Facts({ data }: { data: PokemonDetail | null }) {
         </div>
       ))}
     </dl>
+  );
+}
+
+/**
+ * What each attacking type does to this Pokémon, both of its types counted.
+ * Three plain rows; only the extremes (×4, ×¼) carry a number. Neutral
+ * types are left out.
+ */
+function Matchups({ types }: { types: RadarSpawn["types"] }) {
+  const groups = defensiveMatchups(types);
+  const rows = [
+    { label: "Débil a", tone: "text-red-300", match: (m: number) => m > 1, tag: 4, tagText: "×4" },
+    { label: "Resiste", tone: "text-radar", match: (m: number) => m > 0 && m < 1, tag: 0.25, tagText: "×¼" },
+    { label: "Inmune a", tone: "text-sky-200", match: (m: number) => m === 0, tag: null, tagText: "" },
+  ]
+    .map((row) => ({
+      ...row,
+      entries: groups
+        .filter((group) => row.match(group.multiplier))
+        .flatMap((group) => group.types.map((type) => ({ type, multiplier: group.multiplier }))),
+    }))
+    .filter((row) => row.entries.length > 0);
+
+  return (
+    <Lcd className="shrink-0 px-3.5 py-3">
+      <p className="dex-font-lcd text-[11px] tracking-[0.12em] text-radar/80 uppercase">Daño recibido por tipo</p>
+      <dl className="mt-2 grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2">
+        {rows.map(({ label, tone, tag, tagText, entries }) => (
+          <div key={label} className="contents">
+            <dt className={`dex-font-lcd text-xs whitespace-nowrap ${tone}`}>{label}</dt>
+            <dd className="flex flex-wrap items-center gap-1.5">
+              {entries.map(({ type, multiplier }) => (
+                <span key={type} className="inline-flex items-center gap-0.5">
+                  <TypeIcon type={type} size={20} tooltip="above" />
+                  {multiplier === tag && (
+                    <span className={`dex-font-lcd text-[10px] leading-none ${tone}`} aria-label={`(${tagText})`}>
+                      {tagText}
+                    </span>
+                  )}
+                </span>
+              ))}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </Lcd>
   );
 }
 

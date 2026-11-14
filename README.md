@@ -34,7 +34,7 @@ La interfaz es una **Pokédex de bolsillo** armada alrededor del mapa: una tapa 
 
 1. Vista país: 9 zonas con un pulso de radar y el clima en vivo en cada etiqueta.
 2. Al elegir una zona, la cámara vuela (con inclinación 3D), se despliega un **radar pintado sobre el terreno** y los Pokémon "aparecen" uno a uno.
-3. Al elegir un Pokémon, se abre su ficha con datos reales de la PokéAPI en español (nombre, categoría, descripción de la Pokédex, estadísticas animadas, habilidades).
+3. Al elegir un Pokémon, se abre su ficha con datos reales de la PokéAPI en español (nombre, categoría, descripción de la Pokédex, estadísticas animadas, habilidades) y el daño que recibe de cada tipo: débil a, resiste e inmune, el detalle que el equipo suma en su propia tabla.
 4. Se puede **capturar** hasta 6 Pokémon en el *Equipo de expedición* (se guarda entre visitas); al tocar uno, el mapa te lleva de vuelta adonde lo encontraste. La tecla **Equipo** muestra los seis y los tipos que golpean fuerte a dos o más de ellos.
 5. **Rastreo** (el rayo) recorre los Pokémon potenciados por el clima, zona por zona.
 6. Los **filtros** (tipo, generación, total de estadísticas) responden tanto a nivel país —cada zona muestra cuántos Pokémon coinciden— como dentro de una zona.
@@ -173,7 +173,7 @@ Con la regla de Pokémon GO, el Aconcagua a −12 °C cuenta como "despejado" y 
 - **Más zonas:** Glaciar Perito Moreno, Ushuaia, Talampaya, Esteros del Iberá; *clustering* o niveles de detalle si crece la cantidad de spawns.
 - **Links compartibles:** zona y Pokémon en la URL (`?zona=iguazu&pokemon=54`) para compartir un hallazgo.
 - **Rotación diaria** de spawns (semilla por fecha) para dar motivos de volver.
-- En el detalle: cadena evolutiva y debilidades por tipo (la tabla de tipos ya existe para el análisis del equipo).
+- En el detalle: cadena evolutiva.
 - **Habilidades en español:** hoy se muestran en inglés ("Air Lock"); hay que pedir cada habilidad a la PokéAPI para leer su nombre localizado.
 
 **Técnico**
