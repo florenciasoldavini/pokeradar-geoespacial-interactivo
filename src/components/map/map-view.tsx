@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Map as MapLibreMap, setWorkerUrl } from "maplibre-gl";
+import { AJAXError, Map as MapLibreMap, setWorkerUrl } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapContext } from "@/components/map/map-context";
 import { RadarSweep } from "@/components/map/radar-sweep";
@@ -94,10 +94,10 @@ export function MapView({
         disposed = true;
       };
     }
-    // Before "load", an error without a source is the style itself failing;
-    // later ones (a missing tile) aren't fatal.
-    instance.on("error", (event) => {
-      if (!disposed && !instance.loaded() && !("sourceId" in event)) setFailed(true);
+    // Only the style request failing is fatal; a missing tile or sprite
+    // sheet just leaves a gap.
+    instance.on("error", ({ error }) => {
+      if (!disposed && error instanceof AJAXError && error.url === STYLE_URL) setFailed(true);
     });
     // The dark style references icons its sprite doesn't ship.
     instance.on("styleimagemissing", ({ id }) => {
