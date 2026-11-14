@@ -98,6 +98,9 @@ export function RadarApp({ zones, spawnsByZone, weatherVisitors }: RadarAppProps
     [selectedZone, radarSpawnsByZone],
   );
   const selectedSpawn = radarSpawns.find((spawn) => spawn.id === selectedPokemonId) ?? null;
+  // A weather visitor can leave on refresh while selected: drop the stale id
+  // so its ficha doesn't reopen by itself when the weather comes back.
+  if (selectedPokemonId !== null && selectedSpawn === null) setSelectedPokemonId(null);
 
   const activeFilters = activeFilterCount(filters);
   const filtering = activeFilters > 0;
