@@ -8,8 +8,10 @@ import type { Zone } from "@/lib/zones";
 
 const SOURCE_ID = "radar-sweep";
 const LAYER_ID = "radar-sweep";
-/** Canvas resolution. Re-uploaded every frame, so kept modest. */
-const CANVAS_PX = 640;
+/** Canvas resolution. Re-uploaded on every drawn frame, so kept small; MapLibre scales it up. */
+const CANVAS_PX = 384;
+/** The sweep is drawn at ~30fps: smooth enough, and half the map repaints. */
+const FRAME_MS = 1000 / 30;
 /** Breathing room between the outermost Pokémon and the radar's edge. */
 const EDGE_PADDING_PX = 48;
 const RADAR_RGB = "92 242 165"; // --color-radar
@@ -43,7 +45,9 @@ export function RadarSweep({ zone, spawns }: RadarSweepProps) {
     map.addSource(SOURCE_ID, {
       type: "canvas",
       canvas,
-      animate: true,
+      // Not `animate: true`: that repaints the whole map every frame, even
+      // when the canvas didn't change. Frames are pushed below instead.
+      animate: false,
       // Placeholder size; the effect below fits it to the spawns right away.
       coordinates: groundSquare(zone, EDGE_PADDING_PX),
     });
@@ -61,14 +65,23 @@ export function RadarSweep({ zone, spawns }: RadarSweepProps) {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const start = performance.now();
     let frame = 0;
+    let lastDraw = -Infinity;
     function tick(now: number) {
+      frame = requestAnimationFrame(tick);
+      if (now - lastDraw < FRAME_MS) return;
+      lastDraw = now;
       const elapsed = now - start;
       const intro = reduceMotion ? 1 : Math.min(elapsed / INTRO_MS, 1);
       const angle = reduceMotion
         ? -Math.PI / 2
         : ((elapsed / 1000) * 2 * Math.PI) / SWEEP_SECONDS;
       if (context) drawRadar(context, angle, intro);
-      if (!reduceMotion || intro < 1) frame = requestAnimationFrame(tick);
+      // play() schedules one repaint; pause() uploads this frame right away.
+      const source = map.getSource<CanvasSource>(SOURCE_ID);
+      source?.play();
+      source?.pause();
+      // Reduced motion: one static frame, then the map is left idle.
+      if (reduceMotion) cancelAnimationFrame(frame);
     }
     frame = requestAnimationFrame(tick);
 
