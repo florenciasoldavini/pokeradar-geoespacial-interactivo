@@ -492,7 +492,7 @@ function Socket({
             exit={reduce ? { opacity: 0 } : { scale: 0, opacity: 0, transition: { duration: 0.16 } }}
             whileTap={{ scale: 0.9 }}
             transition={{ type: "spring", stiffness: 420, damping: 20 }}
-            className="absolute inset-0 grid cursor-pointer place-items-center rounded-full bg-[#06110c] outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="absolute inset-0 grid cursor-pointer place-items-center rounded-full bg-[#06110c] outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-white"
             style={{
               boxShadow: current ? "0 0 0 2px #5cf2a5, 0 0 10px rgb(92 242 165 / 0.6)" : `0 0 0 1.5px ${color ?? "#5cf2a5"}aa`,
             }}

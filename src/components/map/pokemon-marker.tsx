@@ -59,7 +59,7 @@ export function PokemonMarker({ spawn, index, lock, dimmed, onSelect }: PokemonM
           aria-label={label}
           aria-pressed={locked}
           data-lock={lock ?? undefined}
-          className={`group relative grid size-16 cursor-pointer place-items-center transition-[transform,opacity] duration-200 ease-out outline-none focus-visible:outline-2 focus-visible:outline-white ${
+          className={`group relative grid size-16 cursor-pointer place-items-center transition-[transform,opacity] duration-200 ease-out outline-hidden focus-visible:rounded-full focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-white ${
             locked ? "scale-[1.18]" : dimmed ? "scale-80 opacity-25" : "hover:scale-110"
           }`}
           style={{ color }}

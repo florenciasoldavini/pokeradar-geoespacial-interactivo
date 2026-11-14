@@ -48,7 +48,7 @@ export function ZoneMarker({ zone, weather, matchCount, selected, receded, tagsH
           .filter(Boolean)
           .join(", ")}
         aria-pressed={selected}
-        className={`group relative grid size-6 cursor-pointer place-items-center transition-opacity duration-200 ease-out outline-none ${
+        className={`group relative grid size-6 cursor-pointer place-items-center transition-opacity duration-200 ease-out outline-hidden focus-visible:rounded-md focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-white ${
           receded ? "opacity-30" : empty ? "opacity-40" : "opacity-100"
         }`}
         style={{ color, "--delay": `${(Math.abs(zone.center[0] % 1) * 2.4).toFixed(2)}s` } as CSSProperties}
