@@ -122,7 +122,10 @@ function Sheet({ id, ariaLabel, expandable, screenHeight, onClose, children, foo
 
   function onDragEnd(_: unknown, info: PanInfo) {
     const at = y.get();
-    if (at > rest + 90 || (info.velocity.y > 600 && !expanded)) return onClose();
+    // Fixed-height sheets don't bind `y` (framer drags their own transform),
+    // so measure how far the finger pulled instead.
+    const pulled = expandable ? at - rest : info.offset.y;
+    if (pulled > 90 || (info.velocity.y > 600 && !expanded)) return onClose();
     if (!expandable) return;
     const next = info.velocity.y < -400 ? true : info.velocity.y > 400 ? false : at < rest / 2;
     setExpanded(next);
