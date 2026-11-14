@@ -9,7 +9,7 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { TYPE_META } from "@/lib/pokemon-types";
 import type { RadarSpawn } from "@/lib/spawn";
 import { WEATHER_META } from "@/lib/weather";
-import { Brackets } from "@/components/device/parts";
+import { BoostMark, Brackets } from "@/components/device/parts";
 
 export type MarkerLock = "selected" | "tracked" | null;
 
@@ -110,10 +110,12 @@ export function PokemonMarker({ spawn, index, lock, dimmed, onSelect }: PokemonM
           {boost && spawn.boostedBy && (
             <span
               aria-hidden
-              className="absolute top-1 right-0 grid size-5 place-items-center rounded-[5px] border border-radar/25 bg-[#06110c] shadow-[0_2px_4px_rgb(0_0_0/0.5)]"
-              style={{ color: boost.color }}
+              className="absolute top-1 -right-2 flex h-5 items-center gap-0.5 rounded-[5px] border border-amber-300/40 bg-[#06110c] px-1 shadow-[0_2px_4px_rgb(0_0_0/0.5)]"
             >
-              <WeatherIcon kind={spawn.boostedBy} className="size-3" />
+              <BoostMark />
+              <span className="flex" style={{ color: boost.color }}>
+                <WeatherIcon kind={spawn.boostedBy} className="size-3" />
+              </span>
             </span>
           )}
           {spawn.isVisitor && (

@@ -8,7 +8,7 @@ import { TYPE_META } from "@/lib/pokemon-types";
 import type { RadarSpawn } from "@/lib/spawn";
 import { WEATHER_META } from "@/lib/weather";
 import type { Zone } from "@/lib/zones";
-import { Cartridge, GREEN_KEY, Lcd, keyClass, pad2, type Placement } from "@/components/device/parts";
+import { BoostMark, Cartridge, GREEN_KEY, Lcd, keyClass, pad2, type Placement } from "@/components/device/parts";
 
 type TrackPanelProps = {
   placement: Placement;
@@ -167,11 +167,13 @@ export function TrackPanel({
                   ) : (
                     spawn.boostedBy && (
                       <span
-                        className="grid size-[22px] place-items-center rounded-[6px] border border-radar/25 bg-[#06110c]"
-                        style={{ color: WEATHER_META[spawn.boostedBy].color }}
+                        className="flex h-[22px] items-center gap-0.5 rounded-[6px] border border-amber-300/40 bg-[#06110c] px-1"
                         title={`Potenciado: ${WEATHER_META[spawn.boostedBy].label}`}
                       >
-                        <WeatherIcon kind={spawn.boostedBy} className="size-[13px]" />
+                        <BoostMark className="size-[13px]" />
+                        <span className="flex" style={{ color: WEATHER_META[spawn.boostedBy].color }}>
+                          <WeatherIcon kind={spawn.boostedBy} className="size-[13px]" />
+                        </span>
                       </span>
                     )
                   )}

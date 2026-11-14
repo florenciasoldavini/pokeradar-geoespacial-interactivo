@@ -10,7 +10,7 @@ import { HABITAT_META } from "@/lib/habitats";
 import type { RadarSpawn } from "@/lib/spawn";
 import { WEATHER_META } from "@/lib/weather";
 import type { Zone } from "@/lib/zones";
-import { CART_LEGEND, Cartridge, Lcd, pad2, type Placement } from "@/components/device/parts";
+import { BoostMark, CART_LEGEND, Cartridge, Lcd, pad2, type Placement } from "@/components/device/parts";
 
 type ZoneCardProps = {
   placement: Placement;
@@ -113,14 +113,9 @@ export function ZoneCard({
                     />
                   )}
                   {spawn.boostedBy && (
-                    <span
-                      aria-hidden
-                      className="absolute top-1 right-1 size-1.5 rounded-full"
-                      style={{
-                        backgroundColor: WEATHER_META[spawn.boostedBy].color,
-                        boxShadow: `0 0 5px ${WEATHER_META[spawn.boostedBy].color}`,
-                      }}
-                    />
+                    <span aria-hidden className="absolute top-0.5 right-0.5 flex">
+                      <BoostMark className="size-2.5" />
+                    </span>
                   )}
                 </button>
               </li>

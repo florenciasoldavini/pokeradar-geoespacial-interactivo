@@ -194,7 +194,25 @@
   color: rgb(92 242 165 / 0.8);
 }
 
+/* "Potenciado": the arrows keep rising. Transform + opacity only, so it stays on the compositor. */
+.pokedex .bz-rise {
+  animation: bz-rise 1.4s ease-in-out infinite;
+}
+
+@keyframes bz-rise {
+  0%,
+  100% {
+    transform: translateY(1.5px);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-1.5px);
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .pokedex .bz-rise,
   .pokedex .bz-bar,
   .pokedex .bz-bob,
   .pokedex .bz-pulse,
