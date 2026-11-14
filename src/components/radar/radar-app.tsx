@@ -433,6 +433,7 @@ export function RadarApp({ zones, spawnsByZone, weatherVisitors }: RadarAppProps
             onChange={setFilters}
             matchCount={totalMatches}
             zoneCount={zonesWithMatches}
+            onShowResults={() => selectZone(null)}
             onClose={closePanel}
           />
         );

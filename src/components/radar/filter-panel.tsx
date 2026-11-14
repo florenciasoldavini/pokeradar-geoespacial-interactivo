@@ -22,6 +22,8 @@ type FilterPanelProps = {
   onChange: (filters: RadarFilters) => void;
   matchCount: number;
   zoneCount: number;
+  /** "Ver N en el mapa": back to the country view, where every match shows. */
+  onShowResults: () => void;
   onClose: () => void;
 };
 
@@ -29,7 +31,16 @@ type FilterPanelProps = {
  * The filters as a cartridge of keycaps. The result
  * line and the primary key both say what you'll see on the map.
  */
-export function FilterPanel({ placement, screenHeight, filters, onChange, matchCount, zoneCount, onClose }: FilterPanelProps) {
+export function FilterPanel({
+  placement,
+  screenHeight,
+  filters,
+  onChange,
+  matchCount,
+  zoneCount,
+  onShowResults,
+  onClose,
+}: FilterPanelProps) {
   const active = activeFilterCount(filters);
   const result = `${matchCount} Pokémon en ${zoneCount} ${zoneCount === 1 ? "zona" : "zonas"}`;
 
@@ -68,7 +79,7 @@ export function FilterPanel({ placement, screenHeight, filters, onChange, matchC
             </button>
             <button
               type="button"
-              onClick={onClose}
+              onClick={onShowResults}
               className={`${GREEN_KEY} h-11 min-w-0 flex-1 truncate rounded-xl px-3 text-[15px] font-semibold`}
             >
               <span className="lg:hidden">Ver {result}</span>
