@@ -174,10 +174,13 @@ Con la regla de Pokémon GO, el Aconcagua a −12 °C cuenta como "despejado" y 
 - **Links compartibles:** zona y Pokémon en la URL (`?zona=iguazu&pokemon=54`) para compartir un hallazgo.
 - **Rotación diaria** de spawns (semilla por fecha) para dar motivos de volver.
 - En el detalle: cadena evolutiva y debilidades por tipo (la tabla de tipos ya existe para el análisis del equipo).
+- **Habilidades en español:** hoy se muestran en inglés ("Air Lock"); hay que pedir cada habilidad a la PokéAPI para leer su nombre localizado.
 
 **Técnico**
 - **Tests:** unitarios para la lógica pura (`classifyWeather`, `applyWeather`, `matchesFilters`, `spawnPosition`) y e2e con Playwright para los flujos principales (zona → Pokémon → captura).
 - **Validación en runtime** de las respuestas externas (p. ej. Zod) en lugar de confiar en los tipos.
-- **Rendimiento:** pausar la animación del radar cuando la pestaña no está visible; medir el costo del canvas source en mobile de gama baja.
-- **Accesibilidad del mapa:** navegación por teclado entre marcadores con flechas y anuncio de la zona actual.
+- **Rendimiento:** activar el React Compiler (hoy sólo corren sus reglas de lint), para que un cambio de estado no vuelva a renderizar todos los marcadores. Además, servir el detalle de cada Pokémon recortado desde el servidor con `'use cache'` en lugar de bajar ~270 KB de la PokéAPI para mostrar ~1 KB, y probar el radar (ya limitado a ~30 cuadros por segundo) en mobile de gama baja.
+- **Resiliencia:** guardar el equipo en memoria cuando `localStorage` está bloqueado (modo privado), y darle *timeout* y reintento manual al pedido del clima.
+- **Accesibilidad:** un interruptor para desactivar los atajos de una letra (WCAG 2.1.4), anunciar el nombre de la zona al cambiar con ▲ ▼, navegación entre marcadores con flechas y un `<h1>` real.
+- **Compartir:** metadatos Open Graph y una imagen de vista previa para cuando se pasa el link.
 - **PWA / offline:** cachear sprites y la última lectura del clima.
