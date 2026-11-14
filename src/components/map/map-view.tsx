@@ -5,6 +5,7 @@ import { Map as MapLibreMap, setWorkerUrl } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MapContext } from "@/components/map/map-context";
 import { RadarSweep } from "@/components/map/radar-sweep";
+import { ScreenError, ScreenWarmup } from "@/components/map/screen-status";
 import type { RadarSpawn } from "@/lib/spawn";
 import type { ZoneWeather } from "@/lib/weather";
 import { ARGENTINA_BOUNDS, type Zone } from "@/lib/zones";
@@ -64,20 +65,39 @@ export function MapView({
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<MapLibreMap | null>(null);
+  const [failed, setFailed] = useState(false);
+  /** Bumped by "Reintentar" to rebuild the map from scratch. */
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     let disposed = false;
-    const instance = new MapLibreMap({
-      container,
-      style: STYLE_URL,
-      bounds: ARGENTINA_BOUNDS,
-      fitBoundsOptions: { padding: 40 },
-      minZoom: 2,
-      maxPitch: 70,
-      attributionControl: { compact: true },
+    let instance: MapLibreMap;
+    try {
+      instance = new MapLibreMap({
+        container,
+        style: STYLE_URL,
+        bounds: ARGENTINA_BOUNDS,
+        fitBoundsOptions: { padding: 40 },
+        minZoom: 2,
+        maxPitch: 70,
+        attributionControl: { compact: true },
+      });
+    } catch {
+      // No WebGL: MapLibre throws while creating its context.
+      queueMicrotask(() => {
+        if (!disposed) setFailed(true);
+      });
+      return () => {
+        disposed = true;
+      };
+    }
+    // Before "load", an error without a source is the style itself failing;
+    // later ones (a missing tile) aren't fatal.
+    instance.on("error", (event) => {
+      if (!disposed && !instance.loaded() && !("sourceId" in event)) setFailed(true);
     });
     // The dark style references icons its sprite doesn't ship.
     instance.on("styleimagemissing", ({ id }) => {
@@ -94,9 +114,15 @@ export function MapView({
 
     return () => {
       disposed = true;
+      setMap(null);
       instance.remove();
     };
-  }, []);
+  }, [attempt]);
+
+  function retry() {
+    setFailed(false);
+    setAttempt((n) => n + 1);
+  }
 
   const selectedZone = zones.find((zone) => zone.id === selectedZoneId);
 
@@ -136,6 +162,7 @@ export function MapView({
           </MapContext>
         )}
       </div>
+      {failed ? <ScreenError onRetry={retry} /> : !map && <ScreenWarmup />}
     </div>
   );
 }
