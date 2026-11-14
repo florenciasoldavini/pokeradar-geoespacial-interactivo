@@ -412,10 +412,16 @@ function SignalLost({ onRetry }: { onRetry: () => void }) {
   );
 }
 
+/** Same shape as a TypeBadge: a white symbol on a colored disc, then the label. */
 function RarityBadge({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/45 bg-amber-300/10 px-2.5 py-0.5 text-xs font-medium text-amber-200">
-      ★ {label}
+    <span className="dex-font-lcd inline-flex items-center gap-1.5 rounded-full border border-amber-300/45 bg-amber-300/10 py-0.5 pr-2.5 pl-1 text-xs text-amber-200">
+      <span aria-hidden className="grid size-4 shrink-0 place-items-center rounded-full bg-amber-400">
+        <svg viewBox="0 0 24 24" className="size-2.5 fill-white">
+          <path d="M12 2.5l2.9 6.2 6.8.8-5 4.6 1.3 6.7L12 17.5l-6 3.3 1.3-6.7-5-4.6 6.8-.8z" />
+        </svg>
+      </span>
+      {label}
     </span>
   );
 }

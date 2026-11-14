@@ -5,7 +5,7 @@ export function TypeBadge({ type }: { type: PokemonType }) {
   const { label, color } = TYPE_META[type];
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-2.5 pl-1 text-xs font-medium"
+      className="dex-font-lcd inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-2.5 pl-1 text-xs"
       style={{
         color,
         borderColor: `${color}55`,

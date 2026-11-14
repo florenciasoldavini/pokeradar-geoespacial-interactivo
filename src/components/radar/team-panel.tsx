@@ -121,7 +121,7 @@ export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRel
                       danger ? "bg-red-500/20 shadow-[inset_0_0_0_1px_rgb(248_113_113/0.6)]" : "bg-white/[0.03]"
                     }`}
                   >
-                    <span className="flex items-center gap-1 text-[11px] leading-tight" style={{ color }}>
+                    <span className="dex-font-lcd flex items-center gap-1 text-[11px] leading-tight" style={{ color }}>
                       <Sprite
                         src={typeIconUrl(threat.type)}
                         alt=""
@@ -131,7 +131,7 @@ export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRel
                       />
                       <span className="truncate">{label}</span>
                     </span>
-                    <span className="dex-font-lcd mt-0.5 flex gap-1.5 text-xs leading-none tabular-nums">
+                    <span className="dex-font-lcd mt-1.5 flex gap-1.5 text-xs leading-none tabular-nums">
                       <span className={threat.weak ? (net > 0 ? "text-red-300" : "text-white/75") : "text-white/25"}>
                         ▲{threat.weak}
                       </span>
