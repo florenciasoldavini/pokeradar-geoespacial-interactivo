@@ -31,6 +31,12 @@ export async function getZoneSpawns(): Promise<ZoneSpawns> {
       }
     }),
   );
+  // PokéAPI fully down: throw rather than cache an empty radar for a day.
+  // A revalidation keeps serving the last good result; a build fails and the
+  // previous deployment stays live.
+  if (entries.every(([, spawns]) => spawns.length === 0)) {
+    throw new Error("PokéAPI no respondió para ninguna zona");
+  }
   return Object.fromEntries(entries);
 }
 
@@ -45,12 +51,15 @@ async function getSpawnsForZone(zone: Zone): Promise<Spawn[]> {
     SPAWNS_PER_ZONE,
   );
 
-  const summaries = await Promise.all(
+  // allSettled: one failed species (say, a 429) costs that Pokémon, not the zone.
+  const results = await Promise.allSettled(
     species.map(({ name, url }) =>
       // Species name, not the Pokémon's: "deoxys" rather than "deoxys-normal".
       fetchPokemonSummary(idFromResourceUrl(url), name),
     ),
   );
+  const summaries = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+  if (summaries.length === 0) throw new Error(`Ningún Pokémon cargó para ${zone.id}`);
 
   return summaries.map((summary, index) => ({
     ...summary,
