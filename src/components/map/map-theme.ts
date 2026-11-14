@@ -1,4 +1,4 @@
-import type { Map as MapLibreMap } from "maplibre-gl";
+import type { ExpressionSpecification, Map as MapLibreMap } from "maplibre-gl";
 
 /* Phosphor palette: the basemap reads as a lit green LCD, not a web map. */
 const LAND = "#0c1713";
@@ -6,11 +6,13 @@ const WATER = "#030806";
 const VEGETATION = "#0f1f19";
 const BOUNDARY = "#2e6b52";
 const LABEL = "#8fd9b4";
+/** Spanish place names first ("Islas Malvinas", not "Falkland Islands"). */
+const SPANISH_NAME: ExpressionSpecification = ["coalesce", ["get", "name:es"], ["get", "name:latin"], ["get", "name"]];
 
 /**
- * Re-tints the OpenFreeMap dark style for the Pokédex screen. Like the
- * production theme it keeps water darker than land (the Río de la Plata
- * stays legible) and only adds a green cast plus brighter borders.
+ * Re-tints the OpenFreeMap dark style for the Pokédex screen: water stays
+ * darker than land (so the Río de la Plata is legible), with a green cast,
+ * brighter borders and place names in Spanish.
  */
 export function applyRadarTheme(map: MapLibreMap) {
   for (const layer of map.getStyle().layers) {
@@ -28,6 +30,10 @@ export function applyRadarTheme(map: MapLibreMap) {
       // Basemap names stay readable but yield to the zone tags.
       map.setPaintProperty(layer.id, "text-color", LABEL);
       map.setPaintProperty(layer.id, "text-opacity", 0.42);
+      // Only labels that show a place name; road refs and the like stay as is.
+      if (JSON.stringify(map.getLayoutProperty(layer.id, "text-field") ?? "").includes("name")) {
+        map.setLayoutProperty(layer.id, "text-field", SPANISH_NAME);
+      }
     }
   }
 }
