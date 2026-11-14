@@ -110,12 +110,13 @@ export function PokemonMarker({ spawn, index, lock, dimmed, onSelect }: PokemonM
           {boost && spawn.boostedBy && (
             <span
               aria-hidden
-              className="absolute top-1 -right-2 flex h-5 items-center gap-0.5 rounded-[5px] border border-amber-300/40 bg-[#06110c] px-1 shadow-[0_2px_4px_rgb(0_0_0/0.5)]"
+              // Beside the marker, not over it: only the box's empty edge is overlapped.
+              className="absolute top-0 left-full -ml-2 flex h-5 items-center gap-0.5 rounded-[5px] border border-amber-300/40 bg-[#06110c] px-1 shadow-[0_2px_4px_rgb(0_0_0/0.5)]"
             >
-              <BoostMark />
               <span className="flex" style={{ color: boost.color }}>
                 <WeatherIcon kind={spawn.boostedBy} className="size-3" />
               </span>
+              <BoostMark />
             </span>
           )}
           {spawn.isVisitor && (

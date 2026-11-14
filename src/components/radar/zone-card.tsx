@@ -2,7 +2,7 @@
 
 import { Led } from "@/components/device/hardware";
 import { Sprite } from "@/components/pokemon/sprite";
-import { TypeBadge } from "@/components/pokemon/type-badge";
+import { TypeIcon } from "@/components/pokemon/type-icon";
 import { WeatherIcon } from "@/components/weather/weather-icon";
 import type { WeatherState } from "@/hooks/use-zone-weather";
 import { plural } from "@/lib/format";
@@ -179,15 +179,17 @@ function WeatherReadout({ zoneId, weather }: { zoneId: string; weather: WeatherS
             {current.temperatureC} °C · viento {current.windKmh} km/h
           </p>
         </div>
-        <span className="flex items-center gap-1.5">
+        {/* Top-aligned with the weather name, not centered on the block. */}
+        <span className="mt-1 flex items-center gap-1.5 self-start">
           <Led color="#22c55e" on size={6} />
           <span className="dex-font-lcd text-[11px] tracking-[0.12em] text-radar uppercase">En vivo</span>
         </span>
       </div>
       <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
         <span className="text-xs text-white/60">Potencia:</span>
+        {/* Icons only, named in the tooltip: keeps the weather block compact. */}
         {meta.boosts.map((type) => (
-          <TypeBadge key={type} type={type} />
+          <TypeIcon key={type} type={type} size={20} tooltip="above" />
         ))}
       </div>
     </div>

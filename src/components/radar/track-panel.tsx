@@ -170,10 +170,10 @@ export function TrackPanel({
                         className="flex h-[22px] items-center gap-0.5 rounded-[6px] border border-amber-300/40 bg-[#06110c] px-1"
                         title={`Potenciado: ${WEATHER_META[spawn.boostedBy].label}`}
                       >
-                        <BoostMark className="size-[13px]" />
                         <span className="flex" style={{ color: WEATHER_META[spawn.boostedBy].color }}>
                           <WeatherIcon kind={spawn.boostedBy} className="size-[13px]" />
                         </span>
+                        <BoostMark className="size-[13px]" />
                       </span>
                     )
                   )}
