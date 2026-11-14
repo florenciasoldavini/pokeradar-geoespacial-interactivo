@@ -15,11 +15,11 @@ type CameraControllerProps = {
 };
 
 /**
- * Fork of the production controller: the same interruptible flyTo (and the
- * same reduced-motion jump: `essential` stays false), but the padding comes
- * from whichever cartridges are in, so the radar lands in the free part of
- * the screen: between the zone and the ficha on desktop, above the sheet on
- * phones.
+ * Translates React state into an interruptible flyTo / fitBounds (with
+ * reduced motion MapLibre jumps instead: `essential` stays false). The
+ * padding comes from whichever panels are open, so the radar lands in the
+ * free part of the screen: between the side panels on desktop, above the
+ * sheet on phones.
  */
 export function CameraController({ target, padding }: CameraControllerProps) {
   const map = useMap();
@@ -32,7 +32,9 @@ export function CameraController({ target, padding }: CameraControllerProps) {
   useEffect(() => {
     const pad = { top, right, bottom, left };
     if (lng === undefined || lat === undefined || zoom === undefined) {
-      map.fitBounds(ARGENTINA_BOUNDS, { padding: pad, pitch: 0, bearing: 0, duration: 1600 });
+      // flyTo stores its padding on the map; absolutePadding replaces it
+      // instead of adding to it, so the country view frames like at first load.
+      map.fitBounds(ARGENTINA_BOUNDS, { padding: pad, absolutePadding: true, pitch: 0, bearing: 0, duration: 1600 });
       return;
     }
     map.flyTo({ center: [lng, lat], zoom, padding: pad, pitch: 48, bearing: -10, speed: 0.9, curve: 1.5 });
