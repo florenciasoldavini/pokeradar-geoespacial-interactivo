@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Bay, Chin, Dock, Lid, Rail, type Readout } from "@/components/device/chrome";
 import { dexDisplay, dexLcd } from "@/components/device/fonts";
 import { SHEET_PEEK, pad2, type Placement } from "@/components/device/parts";
@@ -16,6 +16,7 @@ import { ZoneCard } from "@/components/radar/zone-card";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePlayingCry } from "@/hooks/use-playing-cry";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { TEAM_SIZE, useTeam, type TeamMember } from "@/hooks/use-team";
 import { useZoneWeather } from "@/hooks/use-zone-weather";
 import { playCry } from "@/lib/cry-player";

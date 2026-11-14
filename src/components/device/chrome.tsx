@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Grille, Led, Lens, LidSeam } from "@/components/device/hardware";
 import { FilterIcon, PokeballIcon, SpeakerIcon } from "@/components/ui/icons";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { TEAM_SIZE, type TeamMember } from "@/hooks/use-team";
 import { TYPE_META } from "@/lib/pokemon-types";
 import { LEGEND, LightningIcon, Triangle, keyClass, pad2 } from "@/components/device/parts";

@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import { useEffect } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { TypeBadge } from "@/components/pokemon/type-badge";
 import { PokeballIcon } from "@/components/ui/icons";
 import { WeatherIcon } from "@/components/weather/weather-icon";
 import { usePlayingCry } from "@/hooks/use-playing-cry";
 import { usePokemonDetail, type DetailState } from "@/hooks/use-pokemon-detail";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { TEAM_SIZE } from "@/hooks/use-team";
 import { playCry } from "@/lib/cry-player";
 import { STAT_LABELS, type PokemonDetail } from "@/lib/pokemon-detail";

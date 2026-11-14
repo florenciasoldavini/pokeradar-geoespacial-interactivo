@@ -1,16 +1,10 @@
 "use client";
 
 import { useEffect, useState, type PointerEvent, type ReactNode } from "react";
-import {
-  animate,
-  motion,
-  useDragControls,
-  useMotionValue,
-  useReducedMotion,
-  type PanInfo,
-} from "framer-motion";
+import { animate, motion, useDragControls, useMotionValue, type PanInfo } from "framer-motion";
 import { KEY_BASE, Led } from "@/components/device/hardware";
 import { CloseIcon } from "@/components/ui/icons";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 /*
  * Device parts shared by the chrome and the cartridges. Presses are a

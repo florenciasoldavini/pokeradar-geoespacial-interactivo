@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { MapMarker } from "@/components/map/map-marker";
 import { WeatherIcon } from "@/components/weather/weather-icon";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { TYPE_META } from "@/lib/pokemon-types";
 import type { RadarSpawn } from "@/lib/spawn";
 import { WEATHER_META } from "@/lib/weather";

@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { CART_LEGEND, GREEN_KEY, Lcd } from "@/components/device/parts";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 const STEPS = [
   {
