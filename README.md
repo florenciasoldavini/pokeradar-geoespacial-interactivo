@@ -121,7 +121,7 @@ pnpm lint
 
 ## 3. Uso de Inteligencia Artificial (AI-Native Workflow)
 
-**Herramienta:** Claude Code (modelo Claude Opus 5.5), usado como par de programación dentro del editor.
+**Herramienta:** Claude Code (modelo Claude Opus 5.5), usado como par de programación dentro del editor. Para el rediseño y la auditoría final también usé subagentes, algunos con otros modelos (Claude Fable y dos de OpenAI), para explorar direcciones en paralelo.
 
 **Cómo trabajé:** dividí el desafío en 5 etapas (mapa → datos y detalle → clima → extras → README/deploy). Después de cada una la IA se detenía, yo levantaba la app, la probaba en el navegador (desktop y mobile) y recién entonces seguíamos. Las decisiones de producto (concepto de biomas + clima, extras, cuándo suena el grito) las tomé yo; la IA proponía opciones y escribía la mayor parte del código. También le pedí que verificara las APIs contra la documentación instalada en `node_modules` (Next 16 y MapLibre 6 son más nuevos que lo que "recuerda" un modelo) y contra respuestas reales de las APIs.
 
@@ -142,6 +142,23 @@ pnpm lint
 - **Lint (reglas del React Compiler):** detectó la mutación de un elemento DOM guardado en `useState` dentro de un efecto, y un `useMemo` que se invalidaba en cada render.
 - **Framer Motion:** un `delay` negativo (idiom de CSS, no confiable en Framer), un `delay` que sólo afectaba la opacidad (la animación de escala terminaba invisible) y un `exit` que nunca podía correr porque no había `AnimatePresence`.
 - **Visual (a partir de mis capturas):** los marcadores de zona estaban desplazados ~70 km porque MapLibre centraba también la etiqueta, y el estilo oscuro tenía el agua casi del mismo color que la tierra (el Río de la Plata desaparecía).
+
+### Rediseño: de paneles flotantes a una Pokédex
+
+La primera versión funcionaba, pero se veía como cualquier dashboard oscuro. Como la personalidad pesa 35 %, decidí rediseñarla sin perder lo que ya andaba:
+
+1. **Explorar antes de elegir.** Le pedí a la IA prototipos de la app completa en una ruta temporal con un selector para compararlos sobre los mismos datos. Cada uno lo hizo un subagente distinto, con su modelo: Pokédex, cuaderno de campo, escáner y carta coleccionable. Elegí la Pokédex.
+2. **Afinar la dirección.** Pedí tres variantes de la Pokédex como mockups estáticos y elegí "Dex de bolsillo" porque era la más clara: hardware en los bordes, mapa al centro y paneles que entran como cartuchos. La construimos como prototipo interactivo **sin tocar producción**, para poder volver atrás, y recién cuando me convenció la promovimos y borramos los prototipos.
+3. **Donde corregí a la IA.** Probé una *skill* de diseño para los mockups y cambiaba demasiado la estética respecto de la referencia que me gustaba; la descarté y seguimos sin ella. Probando la versión final pedí que las casillas de la zona fueran todas cuadradas (un sprite grande estiraba su casilla) y que el manual oscureciera todo el dispositivo, no sólo la pantalla. Cuando "no sonaba" el grito al capturar, resultó que el audio estaba silenciado: agregamos un aviso en el visor para que eso no parezca una falla.
+4. **Auditoría final.** Lancé seis subagentes en paralelo (rendimiento, accesibilidad, bugs, calidad de código, estados de carga/error y cumplimiento del enunciado), que verificaron con Playwright en un navegador real. Corregí lo más importante en orden de prioridad, un commit por arreglo:
+   - **Fluidez:** el radar usaba `animate: true` en el *canvas source*, lo que obligaba a MapLibre a redibujar todo el mapa en cada frame (los FPS caían a la mitad con una zona abierta). Ahora se empujan ~30 cuadros por segundo y, con *reducir movimiento*, ninguno.
+   - **Cámara:** `flyTo` guarda su `padding` en el mapa y `fitBounds` le sumaba el suyo, así que al volver al país Argentina quedaba aplastada arriba. Se resolvió con `absolutePadding`.
+   - **Mapa en inglés:** las etiquetas decían "Falkland Islands". Ahora usan `name:es` ("Islas Malvinas").
+   - **Hidratación:** `useReducedMotion` de Framer devuelve `null` en el servidor y `true` en el cliente, y rompía la hidratación para quien tiene *reducir movimiento*. Lo reemplacé por un hook propio que espera a hidratar.
+   - **Foco invisible:** en Tailwind v4, `outline-none` anula el estilo que usa `focus-visible:outline-2`; los marcadores no mostraban foco con teclado.
+   - **Estados:** si el estilo del mapa no cargaba, la pantalla quedaba en negro sin mensaje; ahora muestra "Sin señal del mapa" con reintento. También hay una página 404 en español.
+
+*Lección:* pedir varias direcciones en paralelo y elegir con los prototipos en la mano fue mucho mejor que iterar sobre una sola idea; y una auditoría con verificación real encontró errores que el chequeo de tipos y el lint nunca iban a ver.
 
 ### Pendiente de decisión
 
