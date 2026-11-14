@@ -3,6 +3,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { CART_LEGEND, GREEN_KEY, Lcd } from "@/components/device/parts";
+import { useFocusHandoff } from "@/hooks/use-focus-handoff";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 const STEPS = [
@@ -39,6 +40,8 @@ const SHORTCUTS: readonly (readonly [string, string])[] = [
  */
 export function Manual({ firstRun, onClose }: { firstRun: boolean; onClose: () => void }) {
   const reduce = useReducedMotion();
+  // Focuses the dialog's button on open and hands focus back on close.
+  const focusRef = useFocusHandoff<HTMLButtonElement>();
   return (
     <motion.div
       // Covers the whole device, not just the screen, so no key looks live behind it.
@@ -49,6 +52,12 @@ export function Manual({ firstRun, onClose }: { firstRun: boolean; onClose: () =
       transition={{ duration: 0.18, ease: "easeOut" }}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
+      }}
+      // Modal: Tab stays on the dialog's only control instead of reaching the device behind.
+      onKeyDown={(event) => {
+        if (event.key !== "Tab") return;
+        event.preventDefault();
+        event.currentTarget.querySelector("button")?.focus();
       }}
     >
       <motion.section
@@ -109,8 +118,8 @@ export function Manual({ firstRun, onClose }: { firstRun: boolean; onClose: () =
 
           <button
             type="button"
+            ref={focusRef}
             onClick={onClose}
-            autoFocus
             className={`${GREEN_KEY} dex-font-display mt-3.5 flex h-11 w-full items-center justify-center rounded-xl text-sm font-bold tracking-wide uppercase`}
           >
             {firstRun ? "Encender radar" : "Entendido"}

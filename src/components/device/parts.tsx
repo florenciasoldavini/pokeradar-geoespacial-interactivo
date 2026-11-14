@@ -4,6 +4,7 @@ import { useEffect, useState, type PointerEvent, type ReactNode } from "react";
 import { animate, motion, useDragControls, useMotionValue, type PanInfo } from "framer-motion";
 import { KEY_BASE, Led } from "@/components/device/hardware";
 import { CloseIcon } from "@/components/ui/icons";
+import { useFocusHandoff } from "@/hooks/use-focus-handoff";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 /*
@@ -84,16 +85,19 @@ export function Cartridge(props: CartridgeProps) {
 
 function SidePanel({ id, placement, ariaLabel, fit, children, footer, ...label }: CartridgeProps) {
   const reduce = useReducedMotion();
+  const focusRef = useFocusHandoff<HTMLElement>();
   const away = placement === "left" ? "calc(-100% - 40px)" : "calc(100% + 40px)";
   return (
     <motion.section
+      ref={focusRef}
       id={id}
       role="region"
       aria-label={ariaLabel}
+      tabIndex={-1}
       initial={reduce ? { opacity: 0 } : { x: away, opacity: 0 }}
       animate={{ x: 0, opacity: 1, transition: reduce ? INSTANT : SLIDE }}
       exit={reduce ? { opacity: 0, transition: INSTANT } : { x: away, opacity: 0, transition: SLIDE_OUT }}
-      className={`bz-cart absolute top-3 z-20 flex flex-col overflow-hidden rounded-[18px] ${
+      className={`bz-cart absolute top-3 z-20 flex flex-col overflow-hidden rounded-[18px] outline-none ${
         fit ? "max-h-[calc(100%-24px)]" : "bottom-3"
       } ${placement === "left" ? "left-3 w-[328px]" : "right-3 w-[372px]"}`}
     >
@@ -105,6 +109,7 @@ function SidePanel({ id, placement, ariaLabel, fit, children, footer, ...label }
 
 function Sheet({ id, ariaLabel, expandable, screenHeight, onClose, children, footer, ...label }: CartridgeProps) {
   const reduce = useReducedMotion();
+  const focusRef = useFocusHandoff<HTMLElement>();
   const dragControls = useDragControls();
   const full = Math.round(screenHeight * SHEET_FULL);
   const peek = Math.round(screenHeight * SHEET_PEEK);
@@ -140,9 +145,11 @@ function Sheet({ id, ariaLabel, expandable, screenHeight, onClose, children, foo
 
   return (
     <motion.section
+      ref={focusRef}
       id={id}
       role="region"
       aria-label={ariaLabel}
+      tabIndex={-1}
       style={expandable ? { y, height: full } : undefined}
       initial={expandable ? false : reduce ? { opacity: 0 } : { y: "100%" }}
       animate={expandable ? undefined : { y: 0, opacity: 1, transition: reduce ? INSTANT : SLIDE }}
@@ -158,7 +165,7 @@ function Sheet({ id, ariaLabel, expandable, screenHeight, onClose, children, foo
       dragConstraints={{ top: 0, bottom: rest }}
       dragElastic={{ top: 0.08, bottom: 0.6 }}
       onDragEnd={onDragEnd}
-      className={`bz-cart absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-xl flex-col overflow-hidden rounded-t-[20px] ${
+      className={`bz-cart absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-xl flex-col overflow-hidden rounded-t-[20px] outline-none ${
         expandable ? "" : "max-h-[55%]"
       }`}
     >
