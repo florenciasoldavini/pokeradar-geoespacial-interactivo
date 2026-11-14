@@ -1,9 +1,8 @@
 "use client"; // Error boundaries must be Client Components.
 
 /**
- * Last line of defense, e.g. a browser without WebGL can't create the map.
- * Per-feature failures (PokéAPI, Open-Meteo) are handled inline and never
- * reach this screen.
+ * Last line of defense for an unexpected render error. Per-feature failures
+ * (map, PokéAPI, Open-Meteo) are handled inline and never reach this screen.
  */
 export default function RadarError({ retry }: { error: unknown; retry: () => void }) {
   return (
