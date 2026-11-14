@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { MapMarker } from "@/components/map/map-marker";
+import { Sprite } from "@/components/pokemon/sprite";
 import { WeatherIcon } from "@/components/weather/weather-icon";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { TYPE_META } from "@/lib/pokemon-types";
@@ -95,12 +95,11 @@ export function PokemonMarker({ spawn, index, lock, dimmed, onSelect }: PokemonM
             style={{ "--bob": `${2.2 + (index % 3) * 0.3}s` } as CSSProperties}
           >
             {spawn.sprite ? (
-              <Image
+              <Sprite
                 src={spawn.sprite}
                 alt=""
                 width={56}
                 height={56}
-                unoptimized
                 draggable={false}
                 className="size-14 object-contain object-bottom [image-rendering:pixelated]"
               />

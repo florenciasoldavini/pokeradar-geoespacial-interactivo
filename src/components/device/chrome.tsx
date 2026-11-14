@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Grille, Led, Lens, LidSeam } from "@/components/device/hardware";
+import { Sprite } from "@/components/pokemon/sprite";
 import { FilterIcon, PokeballIcon, SpeakerIcon } from "@/components/ui/icons";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { TEAM_SIZE, type TeamMember } from "@/hooks/use-team";
@@ -498,12 +498,11 @@ function Socket({
             }}
           >
             {member.sprite && (
-              <Image
+              <Sprite
                 src={member.sprite}
                 alt=""
                 width={32}
                 height={32}
-                unoptimized
                 className="size-[84%] object-contain [image-rendering:pixelated]"
               />
             )}

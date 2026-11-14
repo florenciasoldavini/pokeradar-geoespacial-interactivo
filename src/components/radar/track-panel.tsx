@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Sprite } from "@/components/pokemon/sprite";
 import { useEffect, useRef } from "react";
 import { WeatherIcon } from "@/components/weather/weather-icon";
 import type { WeatherState } from "@/hooks/use-zone-weather";
@@ -144,12 +144,11 @@ export function TrackPanel({
                     {pad2(i + 1)}
                   </span>
                   {spawn.sprite ? (
-                    <Image
+                    <Sprite
                       src={spawn.sprite}
                       alt=""
                       width={40}
                       height={40}
-                      unoptimized
                       className="size-10 object-contain [image-rendering:pixelated]"
                     />
                   ) : (

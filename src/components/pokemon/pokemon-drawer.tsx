@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Sprite } from "@/components/pokemon/sprite";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { TypeBadge } from "@/components/pokemon/type-badge";
@@ -177,23 +177,21 @@ function Hero({ spawn, zone, detail }: { spawn: RadarSpawn; zone: Zone; detail: 
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.24, ease: "easeOut" }}
             >
-              <Image
+              <Sprite
                 src={data.artwork}
                 alt={data.name}
                 width={112}
                 height={112}
-                unoptimized
                 className="size-[92px] object-contain lg:size-28"
               />
             </motion.span>
           ) : spawn.sprite ? (
             // The map sprite holds the spot while the scan completes.
-            <Image
+            <Sprite
               src={spawn.sprite}
               alt=""
               width={64}
               height={64}
-              unoptimized
               className="relative size-16 animate-pulse object-contain [image-rendering:pixelated]"
             />
           ) : null}

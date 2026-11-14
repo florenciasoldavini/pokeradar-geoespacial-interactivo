@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { Led } from "@/components/device/hardware";
+import { Sprite } from "@/components/pokemon/sprite";
 import { TypeBadge } from "@/components/pokemon/type-badge";
 import { WeatherIcon } from "@/components/weather/weather-icon";
 import type { WeatherState } from "@/hooks/use-zone-weather";
@@ -103,12 +103,11 @@ export function ZoneCard({
                   } ${dimmed ? "opacity-30" : ""}`}
                 >
                   {spawn.sprite && (
-                    <Image
+                    <Sprite
                       src={spawn.sprite}
                       alt=""
                       width={40}
                       height={40}
-                      unoptimized
                       // Out of flow, so a large sprite can't stretch the square tile.
                       className="absolute inset-0 m-auto size-[86%] object-contain [image-rendering:pixelated]"
                     />
@@ -138,12 +137,11 @@ export function ZoneCard({
       {visitor && visitor.boostedBy && (
         <p className="flex shrink-0 items-center gap-2 px-0.5 text-[13px] leading-snug text-white/70 max-lg:hidden">
           {visitor.sprite && (
-            <Image
+            <Sprite
               src={visitor.sprite}
               alt=""
               width={32}
               height={32}
-              unoptimized
               className="size-8 shrink-0 object-contain [image-rendering:pixelated]"
             />
           )}

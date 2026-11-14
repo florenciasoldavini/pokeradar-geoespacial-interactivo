@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Sprite } from "@/components/pokemon/sprite";
 import { TypeBadge } from "@/components/pokemon/type-badge";
 import { TEAM_SIZE, type TeamMember } from "@/hooks/use-team";
 import { plural } from "@/lib/format";
@@ -64,12 +64,11 @@ export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRel
                     className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-white"
                   >
                     {member.sprite && (
-                      <Image
+                      <Sprite
                         src={member.sprite}
                         alt=""
                         width={40}
                         height={40}
-                        unoptimized
                         className="size-10 shrink-0 object-contain [image-rendering:pixelated]"
                       />
                     )}
