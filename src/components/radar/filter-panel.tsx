@@ -46,24 +46,35 @@ export function FilterPanel({ placement, screenHeight, filters, onChange, matchC
       fit
       expandable
       footer={
-        <div className="flex gap-2">
+        matchCount === 0 ? (
+          // Nothing to see on the map: the way forward is loosening the filters.
           <button
             type="button"
             onClick={() => onChange(DEFAULT_FILTERS)}
-            disabled={active === 0}
-            className={`${keyClass()} h-11 shrink-0 rounded-xl px-4 text-sm font-medium disabled:opacity-40`}
+            className={`${GREEN_KEY} h-11 w-full truncate rounded-xl px-3 text-[15px] font-semibold`}
           >
-            Limpiar
+            Ningún Pokémon coincide · Limpiar filtros
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className={`${GREEN_KEY} h-11 min-w-0 flex-1 truncate rounded-xl px-3 text-[15px] font-semibold`}
-          >
-            <span className="lg:hidden">Ver {result}</span>
-            <span className="max-lg:hidden">Ver {matchCount} en el mapa</span>
-          </button>
-        </div>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => onChange(DEFAULT_FILTERS)}
+              disabled={active === 0}
+              className={`${keyClass()} h-11 shrink-0 rounded-xl px-4 text-sm font-medium disabled:opacity-40`}
+            >
+              Limpiar
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className={`${GREEN_KEY} h-11 min-w-0 flex-1 truncate rounded-xl px-3 text-[15px] font-semibold`}
+            >
+              <span className="lg:hidden">Ver {result}</span>
+              <span className="max-lg:hidden">Ver {matchCount} en el mapa</span>
+            </button>
+          </div>
+        )
       }
     >
       <Lcd className="shrink-0 px-3.5 py-2.5 max-lg:hidden">
