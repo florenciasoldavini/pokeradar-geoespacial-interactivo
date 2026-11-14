@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { TypeBadge } from "@/components/pokemon/type-badge";
 import { TEAM_SIZE, type TeamMember } from "@/hooks/use-team";
+import { plural } from "@/lib/format";
 import { TYPE_META } from "@/lib/pokemon-types";
 import type { Zone } from "@/lib/zones";
 import { isSharedWeakness, teamThreats } from "@/lib/team-coverage";
@@ -106,7 +107,7 @@ export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRel
                 return (
                   <li
                     key={threat.type}
-                    title={`${label}: ${threat.weak} débiles, ${threat.resist} resisten`}
+                    title={`${label}: ${plural(threat.weak, "débil", "débiles")}, ${threat.resist} ${threat.resist === 1 ? "resiste" : "resisten"}`}
                     className={`rounded-[5px] px-1.5 py-1 ${
                       danger ? "bg-red-500/20 shadow-[inset_0_0_0_1px_rgb(248_113_113/0.6)]" : "bg-white/[0.03]"
                     }`}

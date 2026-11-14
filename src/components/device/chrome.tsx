@@ -7,6 +7,7 @@ import { Grille, Led, Lens, LidSeam } from "@/components/device/hardware";
 import { FilterIcon, PokeballIcon, SpeakerIcon } from "@/components/ui/icons";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { TEAM_SIZE, type TeamMember } from "@/hooks/use-team";
+import { plural } from "@/lib/format";
 import { TYPE_META } from "@/lib/pokemon-types";
 import { LEGEND, LightningIcon, Triangle, keyClass, pad2 } from "@/components/device/parts";
 
@@ -203,7 +204,7 @@ export function Rail(props: RailProps) {
       <span className={LEGEND}>Zona</span>
 
       <RailKey
-        label={props.boostCount === null ? "Rastreo de potenciados" : `Rastreo: ${props.boostCount} potenciados`}
+        label={props.boostCount === null ? "Rastreo de potenciados" : `Rastreo: ${plural(props.boostCount, "potenciado")}`}
         title="Rastreo de potenciados (P)"
         expanded={props.trackOpen}
         controls="bz-track"
@@ -365,7 +366,7 @@ export function Dock(props: DockProps) {
       <button
         type="button"
         onClick={props.onToggleTrack}
-        aria-label={props.boostCount === null ? "Rastreo de potenciados" : `Rastreo: ${props.boostCount} potenciados`}
+        aria-label={props.boostCount === null ? "Rastreo de potenciados" : `Rastreo: ${plural(props.boostCount, "potenciado")}`}
         aria-expanded={props.trackOpen}
         aria-controls="bz-track"
         className={`${keyClass(props.trackOpen)} grid h-[52px] w-[42px] shrink-0 content-center justify-items-center gap-1 rounded-xl`}

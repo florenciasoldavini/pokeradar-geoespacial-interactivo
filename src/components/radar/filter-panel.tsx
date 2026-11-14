@@ -10,6 +10,7 @@ import {
   toggled,
   type RadarFilters,
 } from "@/lib/filters";
+import { plural } from "@/lib/format";
 import { POKEMON_TYPES, TYPE_META } from "@/lib/pokemon-types";
 import { CART_LEGEND, Cartridge, GREEN_KEY, Lcd, keyClass, type Placement } from "@/components/device/parts";
 
@@ -72,7 +73,7 @@ export function FilterPanel({ placement, screenHeight, filters, onChange, matchC
         </p>
       </Lcd>
 
-      <Section title="Tipo" aside={filters.types.length > 0 ? `${filters.types.length} elegidos` : "todos"}>
+      <Section title="Tipo" aside={filters.types.length > 0 ? plural(filters.types.length, "elegido") : "todos"}>
         <div className="grid grid-cols-3 gap-1.5 max-lg:grid-cols-4">
           {POKEMON_TYPES.map((type) => {
             const selected = filters.types.includes(type);

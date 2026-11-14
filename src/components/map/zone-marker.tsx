@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { MapMarker } from "@/components/map/map-marker";
 import { WeatherIcon } from "@/components/weather/weather-icon";
+import { plural } from "@/lib/format";
 import { HABITAT_META } from "@/lib/habitats";
 import type { ZoneWeather } from "@/lib/weather";
 import type { Zone } from "@/lib/zones";
@@ -43,7 +44,7 @@ export function ZoneMarker({ zone, weather, matchCount, selected, receded, tagsH
         aria-label={[
           `${zone.name}, hábitat ${label}`,
           weather && `${weather.temperatureC} °C`,
-          matchCount !== null && `${matchCount} coincidencias`,
+          matchCount !== null && plural(matchCount, "coincidencia"),
         ]
           .filter(Boolean)
           .join(", ")}

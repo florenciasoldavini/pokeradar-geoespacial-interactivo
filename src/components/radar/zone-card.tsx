@@ -5,6 +5,7 @@ import { Led } from "@/components/device/hardware";
 import { TypeBadge } from "@/components/pokemon/type-badge";
 import { WeatherIcon } from "@/components/weather/weather-icon";
 import type { WeatherState } from "@/hooks/use-zone-weather";
+import { plural } from "@/lib/format";
 import { HABITAT_META } from "@/lib/habitats";
 import type { RadarSpawn } from "@/lib/spawn";
 import { WEATHER_META } from "@/lib/weather";
@@ -72,10 +73,10 @@ export function ZoneCard({
             ? "Sin señal"
             : matching !== null
               ? `${matching} de ${spawns.length} coinciden`
-              : `${spawns.length} detectados`}
+              : plural(spawns.length, "detectado")}
         </p>
         {boosted > 0 && (
-          <p className="dex-font-lcd text-[11px] tracking-[0.12em] text-amber-200 uppercase">{boosted} potenciados</p>
+          <p className="dex-font-lcd text-[11px] tracking-[0.12em] text-amber-200 uppercase">{plural(boosted, "potenciado")}</p>
         )}
       </div>
 

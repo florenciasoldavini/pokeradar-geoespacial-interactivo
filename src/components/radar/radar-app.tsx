@@ -21,6 +21,7 @@ import { TEAM_SIZE, useTeam, type TeamMember } from "@/hooks/use-team";
 import { useZoneWeather } from "@/hooks/use-zone-weather";
 import { playCry } from "@/lib/cry-player";
 import { DEFAULT_FILTERS, activeFilterCount, matchesFilters, type RadarFilters } from "@/lib/filters";
+import { plural } from "@/lib/format";
 import { TYPE_META } from "@/lib/pokemon-types";
 import { applyWeather } from "@/lib/radar-spawns";
 import type { RadarSpawn, WeatherVisitors, ZoneSpawns } from "@/lib/spawn";
@@ -607,7 +608,7 @@ function statusReadout(input: ReadoutInput): Readout {
     const line =
       spawn && at >= 0
         ? `${pad2(at + 1)}/${pad2(input.zoneBoosted.length)} · ${spawn.name}${spawn.isVisitor ? " · visitante" : ""}`
-        : `${input.zoneBoosted.length} potenciados acá`;
+        : `${plural(input.zoneBoosted.length, "potenciado")} acá`;
     return { trail: [...where, "Rastreo"], line };
   }
   if (spawn) {
@@ -615,7 +616,7 @@ function statusReadout(input: ReadoutInput): Readout {
     return { trail: [...where, `N.º ${String(spawn.id).padStart(3, "0")}`], line: `${spawn.name}${tag}` };
   }
   if (zone) {
-    const detected = input.zoneSpawns.length > 0 ? `${input.zoneSpawns.length} detectados` : "sin señal";
+    const detected = input.zoneSpawns.length > 0 ? plural(input.zoneSpawns.length, "detectado") : "sin señal";
     const sky = input.weather ? `${WEATHER_META[input.weather.kind].label} ${input.weather.temperatureC}° · ` : "";
     return { trail: where, line: `${sky}${detected}` };
   }
@@ -625,7 +626,7 @@ function statusReadout(input: ReadoutInput): Readout {
   }
   if (input.weatherStatus === "loading") return { trail: where, line: "Sintonizando el clima…" };
   if (input.weatherStatus === "error") return { trail: where, line: `${input.zones.length} zonas · clima no disponible` };
-  return { trail: where, line: `${input.zones.length} zonas · ${input.countryBoosted} potenciados` };
+  return { trail: where, line: `${plural(input.zones.length, "zona")} · ${plural(input.countryBoosted, "potenciado")}` };
 }
 
 function isBoolean(value: unknown): value is boolean {
