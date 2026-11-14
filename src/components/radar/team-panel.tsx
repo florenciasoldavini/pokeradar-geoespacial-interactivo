@@ -52,11 +52,11 @@ export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRel
         </Lcd>
       ) : (
         <>
-          <ul className="grid shrink-0 gap-1">
+          <ul className="grid shrink-0 grid-cols-1 gap-1">
             {team.map((member) => {
               const zone = zones.find((z) => z.id === member.zoneId);
               return (
-                <li key={member.id} className="dex-recess flex items-center gap-2 rounded-xl py-1 pr-1.5 pl-1">
+                <li key={member.id} className="dex-recess flex min-w-0 items-center gap-2 rounded-xl py-1 pr-1.5 pl-1">
                   <button
                     type="button"
                     onClick={() => onFocus(member)}
