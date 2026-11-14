@@ -62,7 +62,10 @@ export function PokemonDrawer(props: PokemonDrawerProps) {
   useEffect(() => {
     if (!keysEnabled) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.metaKey || event.ctrlKey || event.altKey || isTyping(event.target)) return;
+      // Spanish and Latin American layouts type [ ] with AltGr / Option,
+      // so those two keys are matched by the character, modifiers or not.
+      const bracket = event.key === "[" || event.key === "]";
+      if (event.metaKey || (!bracket && (event.ctrlKey || event.altKey)) || isTyping(event.target)) return;
       const index = zoneSpawns.findIndex((s) => s.id === spawn.id);
       const step = (by: number) => zoneSpawns[(index + by + zoneSpawns.length) % zoneSpawns.length];
       const key = event.key.toLowerCase();
