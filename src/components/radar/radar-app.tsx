@@ -18,6 +18,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePlayingCry } from "@/hooks/use-playing-cry";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { TEAM_SIZE, useTeam, type TeamMember } from "@/hooks/use-team";
+import { useUiSounds } from "@/hooks/use-ui-sounds";
 import { useZoneWeather } from "@/hooks/use-zone-weather";
 import { playCry } from "@/lib/cry-player";
 import { DEFAULT_FILTERS, activeFilterCount, matchesFilters, type RadarFilters } from "@/lib/filters";
@@ -142,6 +143,11 @@ export function RadarApp({ zones, spawnsByZone, weatherVisitors }: RadarAppProps
     weather.status !== "ready" ? null : selectedZone ? zoneBoosted.length : countryBoosted;
 
   const manualOpen = manualRequested || !manualSeen;
+  useUiSounds(soundOn, {
+    zoneId: selectedZoneId,
+    pokemonId: selectedPokemonId,
+    panelOpen: panel !== null || manualOpen,
+  });
   const tracking = panel === "track";
 
   /* ── Which cartridges are in ──────────────────────────────────────── */
