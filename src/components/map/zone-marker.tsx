@@ -25,7 +25,7 @@ type ZoneMarkerProps = {
 };
 
 /**
- * Fork of the Pokédex variant's LCD waypoint. Inside a zone the cartridge
+ * A zone as an LCD waypoint. Inside a zone the side panel
  * carries the zone's name, so every tag hides and the other zones recede;
  * the pulse is a CSS keyframe, so an idle map costs no JavaScript.
  */
@@ -111,7 +111,7 @@ const TAG_POSITION: Record<TagSide, string> = {
   above: "bottom-full -left-0.5 mb-2",
 };
 
-/** Phones (from the mockup): zones near an edge or a neighbour hang their tag aside. */
+/** Phones: zones near an edge or a neighbour hang their tag aside. */
 const TAG_SIDE: Partial<Record<string, TagSide>> = {
   aconcagua: "right",
   "nahuel-huapi": "above",

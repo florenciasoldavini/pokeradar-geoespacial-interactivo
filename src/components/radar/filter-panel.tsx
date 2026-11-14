@@ -24,7 +24,7 @@ type FilterPanelProps = {
 };
 
 /**
- * Fork of the production filter panel as a cartridge of keycaps. The result
+ * The filters as a cartridge of keycaps. The result
  * line and the primary key both say what you'll see on the map.
  */
 export function FilterPanel({ placement, screenHeight, filters, onChange, matchCount, zoneCount, onClose }: FilterPanelProps) {

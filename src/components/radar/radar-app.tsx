@@ -298,7 +298,6 @@ export function RadarApp({ zones, spawnsByZone, weatherVisitors }: RadarAppProps
       : "available";
 
   // Esc steps back one level: manual → cartridge → Pokémon → zone → country.
-  // 1–9, ← → and R belong to the comparison picker.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {

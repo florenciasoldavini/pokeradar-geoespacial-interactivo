@@ -42,10 +42,9 @@ export type MapViewProps = {
 };
 
 /**
- * Fork of the production MapView with the Pokédex variant's phosphor tint
- * and this variant's markers. The radar is production's canvas-source
- * sweep, painted into the map so it keeps true perspective. Only ever
- * loaded through <MapLoader> (ssr: false).
+ * The MapLibre map with its phosphor tint, zone and Pokémon markers, and
+ * the canvas-source radar sweep, painted into the map so it keeps true
+ * perspective. Only ever loaded through <MapLoader> (ssr: false).
  */
 export function MapView({
   zones,

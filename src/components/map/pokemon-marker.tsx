@@ -25,10 +25,9 @@ type PokemonMarkerProps = {
 };
 
 /**
- * Fork of the Pokédex variant's marker: no CSS filters at all (production
- * blurred the boost aura and drop-shadowed every GIF, which repaints while
- * the map moves), and the idle bob is a CSS keyframe instead of a
- * per-frame JavaScript animation.
+ * A Pokémon on the map. No CSS filters (a blurred aura or drop-shadowed
+ * GIF repaints while the map moves), and the idle bob is a CSS keyframe
+ * instead of a per-frame JavaScript animation.
  */
 export function PokemonMarker({ spawn, index, lock, dimmed, onSelect }: PokemonMarkerProps) {
   const reduce = useReducedMotion();

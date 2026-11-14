@@ -323,9 +323,8 @@ type TeamProps = {
 };
 
 /**
- * Desktop: the strip under the screen. From xl the sockets sit on the left
- * like the mockup; on narrower desktops they move right, clear of the
- * comparison picker at the bottom center.
+ * Desktop: the strip under the screen, with the team sockets and the
+ * audio LED.
  */
 export function Bay({ team, currentId, onSelectMember, crying }: TeamProps & { crying: boolean }) {
   return (
@@ -407,7 +406,7 @@ export function Dock(props: DockProps) {
   );
 }
 
-/** Phones: the strip the comparison picker floats over. Nothing to tap here. */
+/** Phones: the decorative chin under the dock. Nothing to tap here. */
 export function Chin({ crying }: { crying: boolean }) {
   return (
     <div aria-hidden className="flex items-center justify-between px-5 lg:hidden">

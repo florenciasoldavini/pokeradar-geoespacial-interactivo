@@ -19,7 +19,7 @@ type TeamPanelProps = {
 };
 
 /**
- * The EQUIPO key's cartridge (fork of the Pokédex variant's team module):
+ * The EQUIPO key's cartridge:
  * your six, where you caught them, and the types that hit the team hard.
  */
 export function TeamPanel({ placement, screenHeight, team, zones, onFocus, onRelease, onClose }: TeamPanelProps) {
