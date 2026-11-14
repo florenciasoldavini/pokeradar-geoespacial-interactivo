@@ -2,27 +2,20 @@
 
 import dynamic from "next/dynamic";
 
-/**
- * `ssr: false` is only allowed inside a Client Component in the App Router,
- * so the dynamic import lives here rather than in page.tsx.
- */
-export const MapLoader = dynamic(
-  () => import("@/components/map/map-view").then((mod) => mod.MapView),
-  {
-    ssr: false,
-    loading: () => <MapSkeleton />,
-  },
-);
+/** `ssr: false` must live in a Client Component (App Router rule). */
+export const MapLoader = dynamic(() => import("./map-view").then((mod) => mod.MapView), {
+  ssr: false,
+  loading: () => <ScreenWarmup />,
+});
 
-function MapSkeleton() {
+/** The screen warming up while MapLibre and the tiles load. */
+function ScreenWarmup() {
   return (
-    <div className="absolute inset-0 grid place-items-center bg-radar-bg">
+    <div className="absolute inset-0 grid place-items-center bg-[#06110c]">
       <div className="relative grid size-40 place-items-center rounded-full border border-radar/20">
         <div className="absolute inset-6 rounded-full border border-radar/15" />
-        <div className="absolute inset-0 animate-spin rounded-full bg-[conic-gradient(from_0deg,transparent_75%,var(--color-radar))] opacity-40 [animation-duration:2s]" />
-        <span className="relative font-mono text-xs tracking-widest text-radar uppercase">
-          Calibrando radar…
-        </span>
+        <div className="bz-spin absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent_75%,var(--color-radar))] opacity-40" />
+        <span className="dex-font-lcd dex-lcd-text relative text-sm uppercase">Encendiendo…</span>
       </div>
     </div>
   );

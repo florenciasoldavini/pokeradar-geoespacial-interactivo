@@ -1,8 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { CloseIcon, FilterIcon } from "@/components/ui/icons";
+import type { CSSProperties, ReactNode } from "react";
 import { RangeSlider } from "@/components/ui/range-slider";
 import {
   DEFAULT_FILTERS,
@@ -13,196 +11,166 @@ import {
   type RadarFilters,
 } from "@/lib/filters";
 import { POKEMON_TYPES, TYPE_META } from "@/lib/pokemon-types";
+import { CART_LEGEND, Cartridge, GREEN_KEY, Lcd, keyClass, type Placement } from "@/components/device/parts";
 
 type FilterPanelProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  placement: Placement;
+  screenHeight: number;
   filters: RadarFilters;
   onChange: (filters: RadarFilters) => void;
-  /** Live feedback: how many Pokémon (and zones) the filters leave. */
   matchCount: number;
   zoneCount: number;
+  onClose: () => void;
 };
 
-export function FilterPanel({
-  open,
-  onOpenChange,
-  filters,
-  onChange,
-  matchCount,
-  zoneCount,
-}: FilterPanelProps) {
+/**
+ * Fork of the production filter panel as a cartridge of keycaps. The result
+ * line and the primary key both say what you'll see on the map.
+ */
+export function FilterPanel({ placement, screenHeight, filters, onChange, matchCount, zoneCount, onClose }: FilterPanelProps) {
   const active = activeFilterCount(filters);
+  const result = `${matchCount} Pokémon en ${zoneCount} ${zoneCount === 1 ? "zona" : "zonas"}`;
 
   return (
-    <div className="pointer-events-auto relative">
-      <button
-        type="button"
-        onClick={() => onOpenChange(!open)}
-        aria-expanded={open}
-        aria-label="Filtros"
-        aria-controls="filter-panel"
-        className="flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-panel/80 px-3 text-sm backdrop-blur-md transition-colors hover:bg-white/10 sm:h-10 sm:px-4"
-      >
-        <FilterIcon className="size-4" />
-        <span className="hidden sm:inline">Filtros</span>
-        <AnimatePresence>
-          {active > 0 && (
-            <motion.span
-              key="count"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-              className="grid size-5 place-items-center rounded-full bg-radar font-mono text-[11px] font-semibold text-radar-bg tabular-nums"
-            >
-              {active}
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            id="filter-panel"
-            role="dialog"
-            aria-label="Filtros del radar"
-            initial={{ opacity: 0, scale: 0.95, y: -8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -8 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="absolute top-11 right-0 sm:top-12 z-30 w-[min(22rem,calc(100vw-2rem))] origin-top-right rounded-2xl border border-white/10 bg-panel/95 p-4 shadow-2xl backdrop-blur-xl"
+    <Cartridge
+      id="bz-filters"
+      placement={placement}
+      screenHeight={screenHeight}
+      label="Filtros"
+      aside={active > 0 ? `${active} ${active === 1 ? "activo" : "activos"}` : "ninguno"}
+      led="#5cf2a5"
+      ariaLabel="Filtros del radar"
+      closeLabel="Cerrar los filtros"
+      onClose={onClose}
+      fit
+      expandable
+      footer={
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => onChange(DEFAULT_FILTERS)}
+            disabled={active === 0}
+            className={`${keyClass()} h-11 shrink-0 rounded-xl px-4 text-sm font-medium disabled:opacity-40`}
           >
-            <div className="-mt-1 mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold">Filtros</h2>
+            Limpiar
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className={`${GREEN_KEY} h-11 min-w-0 flex-1 truncate rounded-xl px-3 text-[15px] font-semibold`}
+          >
+            <span className="lg:hidden">Ver {result}</span>
+            <span className="max-lg:hidden">Ver {matchCount} en el mapa</span>
+          </button>
+        </div>
+      }
+    >
+      <Lcd className="shrink-0 px-3.5 py-2.5 max-lg:hidden">
+        <p className="dex-font-lcd text-[11px] tracking-[0.12em] text-radar/65 uppercase">Resultado</p>
+        <p className="dex-font-lcd dex-lcd-text mt-1 text-[17px] leading-none" aria-live="polite">
+          {result}
+        </p>
+      </Lcd>
+
+      <Section title="Tipo" aside={filters.types.length > 0 ? `${filters.types.length} elegidos` : "todos"}>
+        <div className="grid grid-cols-3 gap-1.5 max-lg:grid-cols-4">
+          {POKEMON_TYPES.map((type) => {
+            const selected = filters.types.includes(type);
+            const { label, color } = TYPE_META[type];
+            return (
               <button
+                key={type}
                 type="button"
-                onClick={() => onOpenChange(false)}
-                aria-label="Cerrar filtros"
-                className="-mr-1.5 grid size-8 cursor-pointer place-items-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                aria-pressed={selected}
+                onClick={() => onChange({ ...filters, types: toggled(filters.types, type) })}
+                className={`${keyClass(selected)} flex h-8 min-w-0 items-center gap-1.5 rounded-[9px] px-2 text-left text-[12.5px] max-lg:px-1.5 max-lg:text-xs`}
+                style={
+                  selected
+                    ? ({
+                        background: `linear-gradient(180deg, color-mix(in srgb, ${color} 34%, #1a1d22), color-mix(in srgb, ${color} 18%, #121418))`,
+                        boxShadow: `0 0.5px 0 rgb(0 0 0 / 0.55), inset 0 1px 3px rgb(0 0 0 / 0.55), inset 0 0 0 1px color-mix(in srgb, ${color} 70%, transparent)`,
+                      } satisfies CSSProperties)
+                    : undefined
+                }
               >
-                <CloseIcon className="size-4" />
+                <span
+                  aria-hidden
+                  className="size-[7px] shrink-0 rounded-full shadow-[0_0_0_1px_rgb(0_0_0/0.5)]"
+                  style={{ backgroundColor: color, boxShadow: selected ? `0 0 6px ${color}` : undefined }}
+                />
+                <span className="truncate">{label}</span>
               </button>
-            </div>
-            <FilterSection title="Tipo">
-              <div className="flex flex-wrap gap-1.5">
-                {POKEMON_TYPES.map((type) => {
-                  const selected = filters.types.includes(type);
-                  const { label, color } = TYPE_META[type];
-                  return (
-                    <motion.button
-                      key={type}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() =>
-                        onChange({ ...filters, types: toggled(filters.types, type) })
-                      }
-                      whileTap={{ scale: 0.92 }}
-                      animate={{
-                        backgroundColor: selected ? `${color}33` : "rgba(255,255,255,0.03)",
-                        borderColor: selected ? color : "rgba(255,255,255,0.1)",
-                        color: selected ? color : "rgba(255,255,255,0.6)",
-                      }}
-                      transition={{ duration: 0.15 }}
-                      className="cursor-pointer rounded-full border px-2.5 py-1 text-xs font-medium"
-                    >
-                      {label}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </FilterSection>
+            );
+          })}
+        </div>
+      </Section>
 
-            <FilterSection title="Generación">
-              <div className="grid grid-cols-3 gap-1.5">
-                {GENERATIONS.map((generation) => {
-                  const selected = filters.generations.includes(generation.value);
-                  return (
-                    <button
-                      key={generation.value}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() =>
-                        onChange({
-                          ...filters,
-                          generations: toggled(filters.generations, generation.value),
-                        })
-                      }
-                      className={`cursor-pointer rounded-xl border px-2 py-2 text-left transition-colors ${
-                        selected
-                          ? "border-radar/60 bg-radar/10 text-radar"
-                          : "border-white/10 bg-white/3 text-white/60 hover:bg-white/8"
-                      }`}
-                    >
-                      <span className="block font-mono text-sm font-semibold">
-                        {generation.label}
-                      </span>
-                      <span className="text-[11px] opacity-80">{generation.region}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </FilterSection>
-
-            <FilterSection
-              title="Total de estadísticas base"
-              aside={
-                <span className="font-mono text-xs text-white/70 tabular-nums">
-                  {filters.statTotal[0]} – {filters.statTotal[1]}
+      <Section title="Generación">
+        <div className="grid grid-cols-4 overflow-hidden rounded-[11px] shadow-[0_0_0_1px_rgb(0_0_0/0.5)]">
+          <button
+            type="button"
+            aria-pressed={filters.generations.length === 0}
+            onClick={() => onChange({ ...filters, generations: [] })}
+            className={`${keyClass(filters.generations.length === 0)} h-10 rounded-none text-[13px]`}
+          >
+            Todas
+          </button>
+          {GENERATIONS.map((generation) => {
+            const selected = filters.generations.includes(generation.value);
+            return (
+              <button
+                key={generation.value}
+                type="button"
+                aria-pressed={selected}
+                aria-label={`Generación ${generation.label}: ${generation.region}`}
+                onClick={() => onChange({ ...filters, generations: toggled(filters.generations, generation.value) })}
+                className={`${keyClass(selected)} flex h-10 flex-col items-center justify-center gap-0.5 rounded-none border-l border-black/50`}
+              >
+                <span className={`dex-font-lcd text-[13px] leading-none ${selected ? "dex-lcd-text" : ""}`}>
+                  {generation.label}
                 </span>
-              }
-            >
-              <RangeSlider
-                min={STAT_TOTAL_BOUNDS.min}
-                max={STAT_TOTAL_BOUNDS.max}
-                step={STAT_TOTAL_BOUNDS.step}
-                value={filters.statTotal}
-                onChange={(statTotal) => onChange({ ...filters, statTotal })}
-                labels={["Total mínimo", "Total máximo"]}
-              />
-            </FilterSection>
-
-            <div className="mt-4 flex items-center justify-between border-t border-white/8 pt-3">
-              <p className="text-xs text-white/55" aria-live="polite">
-                <span className="font-medium text-white tabular-nums">{matchCount}</span>{" "}
-                Pokémon en{" "}
-                <span className="font-medium text-white tabular-nums">{zoneCount}</span>{" "}
-                {zoneCount === 1 ? "zona" : "zonas"}
-              </p>
-              <button
-                type="button"
-                onClick={() => onChange(DEFAULT_FILTERS)}
-                disabled={active === 0}
-                className="cursor-pointer text-xs text-white/55 transition-colors hover:text-white disabled:cursor-default disabled:opacity-40 disabled:hover:text-white/55"
-              >
-                Limpiar
+                <span className="text-[10.5px] leading-none text-white/60">{generation.region}</span>
               </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+            );
+          })}
+        </div>
+      </Section>
+
+      <Section
+        title="Total de estadísticas"
+        aside={
+          <span className="dex-font-lcd dex-lcd-text text-[13px] tabular-nums">
+            {filters.statTotal[0]} a {filters.statTotal[1]}
+          </span>
+        }
+      >
+        <Lcd className="px-4 py-1.5">
+          <RangeSlider
+            min={STAT_TOTAL_BOUNDS.min}
+            max={STAT_TOTAL_BOUNDS.max}
+            step={STAT_TOTAL_BOUNDS.step}
+            value={filters.statTotal}
+            onChange={(statTotal) => onChange({ ...filters, statTotal })}
+            labels={["Total mínimo", "Total máximo"]}
+          />
+        </Lcd>
+      </Section>
+    </Cartridge>
   );
 }
 
-function FilterSection({
-  title,
-  aside,
-  children,
-}: {
-  title: string;
-  aside?: ReactNode;
-  children: ReactNode;
-}) {
+function Section({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) {
   return (
-    <fieldset className="mt-4 first:mt-0">
-      <div className="mb-2 flex items-baseline justify-between">
-        <legend className="font-mono text-[11px] tracking-wider text-white/45 uppercase">
-          {title}
-        </legend>
-        {aside}
+    <div role="group" aria-label={title} className="shrink-0">
+      <div className="mb-1.5 flex items-baseline justify-between px-0.5">
+        <h3 className={CART_LEGEND}>{title}</h3>
+        {typeof aside === "string" ? (
+          <span className="dex-font-display text-[11px] font-semibold tracking-[0.12em] text-radar/80 uppercase">{aside}</span>
+        ) : (
+          aside
+        )}
       </div>
       {children}
-    </fieldset>
+    </div>
   );
 }

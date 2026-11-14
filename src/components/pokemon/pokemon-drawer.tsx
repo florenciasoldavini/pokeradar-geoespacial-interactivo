@@ -1,434 +1,451 @@
 "use client";
 
 import Image from "next/image";
-import { AnimatePresence, motion, useDragControls } from "framer-motion";
-import { StatBar } from "@/components/pokemon/stat-bar";
+import { useEffect } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { TypeBadge } from "@/components/pokemon/type-badge";
-import { CloseIcon, PokeballIcon, SpeakerIcon } from "@/components/ui/icons";
+import { PokeballIcon } from "@/components/ui/icons";
 import { WeatherIcon } from "@/components/weather/weather-icon";
-import { DESKTOP_QUERY, useMediaQuery } from "@/hooks/use-media-query";
 import { usePlayingCry } from "@/hooks/use-playing-cry";
-import { usePokemonDetail } from "@/hooks/use-pokemon-detail";
+import { usePokemonDetail, type DetailState } from "@/hooks/use-pokemon-detail";
 import { TEAM_SIZE } from "@/hooks/use-team";
 import { playCry } from "@/lib/cry-player";
 import { STAT_LABELS, type PokemonDetail } from "@/lib/pokemon-detail";
-import { TYPE_META } from "@/lib/pokemon-types";
+import { TYPE_META, generationOf } from "@/lib/pokemon-types";
 import type { RadarSpawn } from "@/lib/spawn";
 import { WEATHER_META } from "@/lib/weather";
 import type { Zone } from "@/lib/zones";
+import { CART_LEGEND, Cartridge, GREEN_KEY, Lcd, WaveIcon, keyClass, type Placement } from "@/components/device/parts";
 
-/** Where the shown Pokémon stands relative to the expedition team. */
 export type TeamStatus = "available" | "in-team" | "full";
 
-type TeamActions = {
-  status: TeamStatus;
+type PokemonDrawerProps = {
+  placement: Placement;
+  screenHeight: number;
+  spawn: RadarSpawn;
+  zone: Zone;
+  zoneSpawns: readonly RadarSpawn[];
+  teamStatus: TeamStatus;
+  teamCount: number;
   onCatch: () => void;
   onRelease: () => void;
-};
-
-type PokemonDrawerProps = {
-  spawn: RadarSpawn | null;
-  zone: Zone | null;
-  team: TeamActions;
+  onOpenTeam: () => void;
+  onSelectPokemon: (pokemonId: number) => void;
   onClose: () => void;
+  /** Off while the manual is up, so C and G don't fire behind it. */
+  keysEnabled: boolean;
 };
 
-export function PokemonDrawer({ spawn, zone, team, onClose }: PokemonDrawerProps) {
-  const isDesktop = useMediaQuery(DESKTOP_QUERY);
-  const dragControls = useDragControls();
-  const offscreen = isDesktop ? { x: "110%" } : { y: "100%" };
+const ROMAN = { 1: "I", 2: "II", 3: "III" } as const;
+/** Highest base stat in Gen I–III (Blissey's PS) sets the bars' scale. */
+const MAX_STAT = 255;
+const NUMBER = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1 });
+
+/**
+ * The Pokémon cartridge, read top to bottom: who it is, the one thing to
+ * do (capture), then the Pokédex entry, stats and facts from PokéAPI.
+ */
+export function PokemonDrawer(props: PokemonDrawerProps) {
+  const { spawn, zone, zoneSpawns, onSelectPokemon, teamStatus, keysEnabled } = props;
+  const detail = usePokemonDetail(spawn.id);
+  const data = detail.status === "success" ? detail.data : null;
+  const crying = usePlayingCry() === spawn.id;
+  const cryUrl = data?.cry ?? spawn.cry;
+  const name = data?.name ?? spawn.name;
+
+  function cry() {
+    if (cryUrl) playCry(spawn.id, cryUrl);
+  }
+
+  // C capture, G cry, [ ] walk the zone's roster.
+  useEffect(() => {
+    if (!keysEnabled) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.metaKey || event.ctrlKey || event.altKey || isTyping(event.target)) return;
+      const index = zoneSpawns.findIndex((s) => s.id === spawn.id);
+      const step = (by: number) => zoneSpawns[(index + by + zoneSpawns.length) % zoneSpawns.length];
+      const key = event.key.toLowerCase();
+      if (key === "c" && teamStatus === "available") props.onCatch();
+      else if (key === "g") cry();
+      else if (key === "[") onSelectPokemon(step(-1)?.id ?? spawn.id);
+      else if (key === "]") onSelectPokemon(step(1)?.id ?? spawn.id);
+      else return;
+      event.preventDefault();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
 
   return (
-    <AnimatePresence>
-      {spawn && (
-        <motion.aside
-          key="pokemon-drawer"
-          aria-labelledby="pokemon-drawer-title"
-          initial={offscreen}
-          animate={{ x: 0, y: 0 }}
-          exit={offscreen}
-          transition={{ type: "spring", stiffness: 280, damping: 32 }}
-          // Mobile bottom sheet: drag the handle down to dismiss.
-          drag={isDesktop ? false : "y"}
-          dragListener={false}
-          dragControls={dragControls}
-          dragConstraints={{ top: 0, bottom: 0 }}
-          dragElastic={{ top: 0, bottom: 0.7 }}
-          onDragEnd={(_, info) => {
-            if (info.offset.y > 120 || info.velocity.y > 600) onClose();
-          }}
-          className="fixed inset-x-0 bottom-0 z-20 flex max-h-[78dvh] flex-col overflow-hidden rounded-t-3xl border border-white/10 bg-panel/95 shadow-2xl backdrop-blur-xl md:inset-y-4 md:right-4 md:left-auto md:max-h-none md:w-[400px] md:rounded-3xl"
-        >
-          <div
-            className="flex shrink-0 cursor-grab touch-none justify-center pt-3 pb-1 active:cursor-grabbing md:hidden"
-            onPointerDown={(event) => dragControls.start(event)}
-            aria-hidden
-          >
-            <span className="h-1 w-10 rounded-full bg-white/20" />
-          </div>
+    <Cartridge
+      id="bz-ficha"
+      placement={props.placement}
+      screenHeight={props.screenHeight}
+      label={`N.º ${String(spawn.id).padStart(3, "0")} · ${name}`}
+      aside={`GEN ${ROMAN[generationOf(spawn.id)]}`}
+      led="#5cf2a5"
+      ariaLabel={`Ficha de ${name}`}
+      closeLabel="Cerrar la ficha"
+      onClose={props.onClose}
+      expandable
+    >
+      <Hero spawn={spawn} zone={zone} detail={detail} />
 
-          {/* Switching Pokémon crossfades the content, not the whole panel. */}
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={spawn.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.18 }}
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
-            >
-              <DrawerContent
-                spawn={spawn}
-                zone={zone}
-                team={team}
-                onClose={onClose}
-              />
-            </motion.div>
-          </AnimatePresence>
-        </motion.aside>
+      <div className="shrink-0">
+        <div className="grid grid-cols-[1fr_auto] gap-2">
+          <CaptureKey status={teamStatus} name={name} onCatch={props.onCatch} onRelease={props.onRelease} />
+          <button
+            type="button"
+            onClick={cry}
+            disabled={!cryUrl}
+            aria-label={`Escuchar el grito de ${name}`}
+            title="Escuchar su grito (G)"
+            className={`${keyClass(crying)} flex h-11 items-center gap-2 rounded-xl px-3.5 text-sm font-medium disabled:opacity-40`}
+          >
+            {crying ? <Equalizer /> : <WaveIcon className="size-4" />}
+            Grito
+          </button>
+        </div>
+        <TeamLine status={teamStatus} count={props.teamCount} onOpenTeam={props.onOpenTeam} />
+      </div>
+
+      {detail.status === "error" ? (
+        <Lcd className="shrink-0">
+          <SignalLost onRetry={detail.retry} />
+        </Lcd>
+      ) : (
+        <>
+          <Lcd className="shrink-0 px-3.5 py-3">
+            <p className="dex-font-lcd text-[11px] tracking-[0.12em] text-radar/80 uppercase">Entrada de la Pokédex</p>
+            {data ? (
+              <p className="mt-1.5 text-[13.5px] leading-[1.55] text-white/90">
+                {data.description ?? "La PokéAPI no tiene una entrada en español para esta especie."}
+              </p>
+            ) : (
+              <div className="mt-2.5 space-y-2" aria-label="Cargando la entrada">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-[92%]" />
+                <Skeleton className="h-3 w-3/5" />
+              </div>
+            )}
+          </Lcd>
+          <Stats key={data?.id ?? "loading"} data={data} />
+          <Facts data={data} />
+        </>
       )}
-    </AnimatePresence>
+    </Cartridge>
   );
 }
 
-function DrawerContent({
-  spawn,
-  zone,
-  team,
-  onClose,
-}: {
-  spawn: RadarSpawn;
-  zone: Zone | null;
-  team: TeamActions;
-  onClose: () => void;
-}) {
-  const detail = usePokemonDetail(spawn.id);
+function Hero({ spawn, zone, detail }: { spawn: RadarSpawn; zone: Zone; detail: DetailState }) {
+  const reduce = useReducedMotion();
   const data = detail.status === "success" ? detail.data : null;
   const types = data?.types ?? spawn.types;
   const accent = types[0] ? TYPE_META[types[0]].color : "#5cf2a5";
+  const digits = String(spawn.id).padStart(4, "0");
+  const lead = digits.length - String(spawn.id).length;
 
   return (
-    <div className="px-5 pb-6 md:pt-5">
-      <div className="flex items-center justify-between">
-        <p className="font-mono text-[11px] tracking-wider text-white/45 uppercase">
-          N.º {String(spawn.id).padStart(3, "0")}
-          {zone && <> · {zone.name}</>}
-        </p>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Cerrar detalle"
-          className="grid size-8 cursor-pointer place-items-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          <CloseIcon className="size-4" />
-        </button>
+    <Lcd className="shrink-0 px-3.5 pt-2.5 pb-3">
+      <div className="dex-font-lcd flex items-baseline gap-2 text-[11px] tracking-[0.1em] text-radar/65 uppercase max-lg:hidden">
+        <span className="text-xl leading-none tabular-nums" aria-hidden>
+          <span className="text-radar/30">{digits.slice(0, lead)}</span>
+          <span className="dex-lcd-text">{digits.slice(lead)}</span>
+        </span>
+        <span>Gen {ROMAN[generationOf(spawn.id)]}</span>
+        <span className="ml-auto truncate">{zone.name}</span>
       </div>
 
-      {/* Hero: the animated map sprite holds the spot until the artwork loads. */}
-      <div
-        className="relative mt-2 grid h-48 place-items-center"
-        style={{
-          background: `radial-gradient(circle at 50% 60%, ${accent}33, transparent 65%)`,
-        }}
+      <motion.div
+        key={spawn.id}
+        initial={reduce ? false : { opacity: 0, x: 8 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        className="mt-1 grid grid-cols-[92px_minmax(0,1fr)] items-center gap-3 lg:grid-cols-[112px_minmax(0,1fr)]"
       >
-        {data?.artwork ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          >
-            <Image
-              src={data.artwork}
-              alt={data.name}
-              width={192}
-              height={192}
-              unoptimized
-              className="size-48 object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)]"
-            />
-          </motion.div>
-        ) : spawn.sprite ? (
-          <Image
-            src={spawn.sprite}
-            alt=""
-            width={96}
-            height={96}
-            unoptimized
-            className="size-24 animate-pulse object-contain [image-rendering:pixelated]"
+        <div className="relative grid size-[92px] place-items-center lg:size-28">
+          <span
+            aria-hidden
+            className="absolute inset-2 rounded-full shadow-[inset_0_0_0_1px_rgb(92_242_165/0.14)]"
+            style={{ background: `radial-gradient(circle, ${accent}2e, transparent 70%)` }}
           />
-        ) : null}
-      </div>
-
-      <div className="mt-1 flex items-center gap-3">
-        <h2
-          id="pokemon-drawer-title"
-          className="text-3xl font-semibold tracking-tight"
-        >
-          {data?.name ?? spawn.name}
-        </h2>
-        {spawn.cry && <CryButton id={spawn.id} url={spawn.cry} />}
-      </div>
-      {detail.status === "loading" ? (
-        <Skeleton className="mt-2 h-4 w-32" />
-      ) : (
-        data?.genus && <p className="mt-0.5 text-sm text-white/55">{data.genus}</p>
-      )}
-      <div className="mt-3 flex flex-wrap gap-2">
-        {types.map((type) => (
-          <TypeBadge key={type} type={type} />
-        ))}
-        {data?.isLegendary && <RarityBadge label="Legendario" />}
-        {data?.isMythical && <RarityBadge label="Singular" />}
-      </div>
-
-      <CaptureButton team={team} />
-
-      {spawn.boostedBy && <WeatherNote spawn={spawn} />}
-
-      {detail.status === "loading" && <DetailSkeleton />}
-      {detail.status === "error" && <DetailError onRetry={detail.retry} />}
-      {data && <DetailBody data={data} accent={accent} />}
-    </div>
-  );
-}
-
-function DetailBody({ data, accent }: { data: PokemonDetail; accent: string }) {
-  const total = data.stats.reduce((sum, stat) => sum + stat.value, 0);
-
-  return (
-    <>
-      {data.description && (
-        <p className="mt-5 text-sm leading-relaxed text-white/75">
-          {data.description}
-        </p>
-      )}
-
-      <section className="mt-6">
-        <div className="flex items-baseline justify-between">
-          <h3 className="font-mono text-[11px] tracking-wider text-white/45 uppercase">
-            Estadísticas base
-          </h3>
-          <span className="font-mono text-xs text-white/45">
-            Total <span className="text-white/80 tabular-nums">{total}</span>
-          </span>
-        </div>
-        <dl className="mt-3 space-y-2.5">
-          {data.stats.map((stat, index) => (
-            <StatBar
-              key={stat.name}
-              label={STAT_LABELS[stat.name]}
-              value={stat.value}
-              color={accent}
-              index={index}
-            />
-          ))}
-        </dl>
-      </section>
-
-      <dl className="mt-6 grid grid-cols-2 gap-3">
-        <InfoTile label="Altura" value={`${data.heightM.toFixed(1)} m`} />
-        <InfoTile label="Peso" value={`${data.weightKg.toFixed(1)} kg`} />
-        <div className="col-span-2 rounded-xl border border-white/8 bg-white/3 p-3">
-          <dt className="font-mono text-[11px] tracking-wider text-white/45 uppercase">
-            Habilidades
-          </dt>
-          <dd className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-sm">
-            {data.abilities.map((ability) => (
-              <span key={ability.name}>
-                {ability.name}
-                {ability.hidden && (
-                  <span className="ml-1 text-xs text-white/40">(oculta)</span>
-                )}
-              </span>
-            ))}
-          </dd>
-        </div>
-      </dl>
-    </>
-  );
-}
-
-function InfoTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-white/8 bg-white/3 p-3">
-      <dt className="font-mono text-[11px] tracking-wider text-white/45 uppercase">
-        {label}
-      </dt>
-      <dd className="mt-1 text-lg font-medium tabular-nums">{value}</dd>
-    </div>
-  );
-}
-
-function CryButton({ id, url }: { id: number; url: string }) {
-  const playing = usePlayingCry() === id;
-  return (
-    <button
-      type="button"
-      onClick={() => playCry(id, url)}
-      aria-label="Escuchar su grito"
-      title="Escuchar su grito"
-      className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border border-white/10 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-    >
-      {playing ? (
-        // Little equalizer while the cry plays.
-        <span className="flex h-3.5 items-end gap-[3px]" aria-hidden>
-          {[0, 1, 2].map((bar) => (
+          {data?.artwork ? (
             <motion.span
-              key={bar}
-              className="w-[3px] origin-bottom rounded-full bg-radar"
-              style={{ height: "100%" }}
-              animate={{ scaleY: [0.3, 1, 0.5, 0.9, 0.3] }}
-              transition={{ duration: 0.7, repeat: Infinity, delay: bar * 0.12 }}
+              className="relative block"
+              initial={reduce ? false : { opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.24, ease: "easeOut" }}
+            >
+              <Image
+                src={data.artwork}
+                alt={data.name}
+                width={112}
+                height={112}
+                unoptimized
+                className="size-[92px] object-contain lg:size-28"
+              />
+            </motion.span>
+          ) : spawn.sprite ? (
+            // The map sprite holds the spot while the scan completes.
+            <Image
+              src={spawn.sprite}
+              alt=""
+              width={64}
+              height={64}
+              unoptimized
+              className="relative size-16 animate-pulse object-contain [image-rendering:pixelated]"
             />
-          ))}
+          ) : null}
+        </div>
+        <div className="min-w-0">
+          <h2 className="truncate text-[26px] leading-[1.05] font-bold tracking-tight text-white max-lg:text-[23px]">
+            {data?.name ?? spawn.name}
+          </h2>
+          {detail.status === "loading" ? (
+            <Skeleton className="mt-2 mb-2.5 h-3 w-28" />
+          ) : (
+            <p className="mt-1 mb-2 truncate text-[13px] text-white/65">{data?.genus ?? " "}</p>
+          )}
+          <div className="flex flex-wrap gap-1.5">
+            {types.map((type) => (
+              <TypeBadge key={type} type={type} />
+            ))}
+            {data?.isLegendary && <RarityBadge label="Legendario" />}
+            {data?.isMythical && <RarityBadge label="Singular" />}
+          </div>
+        </div>
+      </motion.div>
+
+      <WeatherLine spawn={spawn} zone={zone} />
+    </Lcd>
+  );
+}
+
+function WeatherLine({ spawn, zone }: { spawn: RadarSpawn; zone: Zone }) {
+  if (!spawn.boostedBy) {
+    return (
+      <p className="mt-2.5 border-t border-radar/15 pt-2 text-xs text-white/55">
+        El clima de hoy no lo potencia.
+      </p>
+    );
+  }
+  const weather = WEATHER_META[spawn.boostedBy];
+  const helped = spawn.types.filter((type) => weather.boosts.includes(type)).map((type) => TYPE_META[type].label);
+  return (
+    <p className="mt-2.5 flex items-start gap-2 border-t border-radar/15 pt-2 text-[12.5px] leading-snug text-white/80">
+      <span style={{ color: weather.color }} className="mt-px shrink-0">
+        <WeatherIcon kind={spawn.boostedBy} className="size-4" />
+      </span>
+      {spawn.isVisitor ? (
+        <span>
+          <b className="font-semibold text-white">Visitante:</b> no vive en {zone.name}; lo trajo el clima (
+          {weather.label.toLowerCase()}).
         </span>
       ) : (
-        <SpeakerIcon className="size-4" />
+        <span>
+          <b className="font-semibold text-white">Potenciado:</b> el clima ({weather.label.toLowerCase()}) favorece a{" "}
+          {joinAnd(helped)}.
+        </span>
       )}
-    </button>
-  );
-}
-
-function CaptureButton({ team }: { team: TeamActions }) {
-  return (
-    <div className="mt-4 flex items-center gap-3">
-      <AnimatePresence mode="wait" initial={false}>
-        {team.status === "in-team" ? (
-          <motion.div
-            key="in-team"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="flex flex-1 items-center justify-between rounded-full border border-radar/40 bg-radar/10 py-2 pr-2 pl-4"
-          >
-            <span className="flex items-center gap-2 text-sm font-medium text-radar">
-              <PokeballIcon className="size-4" />
-              En tu equipo
-            </span>
-            <button
-              type="button"
-              onClick={team.onRelease}
-              className="cursor-pointer rounded-full px-3 py-1 text-xs text-white/60 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              Liberar
-            </button>
-          </motion.div>
-        ) : (
-          <motion.button
-            key="catch"
-            type="button"
-            onClick={team.onCatch}
-            disabled={team.status === "full"}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            whileTap={{ scale: 0.96 }}
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-radar py-2.5 text-sm font-semibold text-radar-bg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/40"
-          >
-            <PokeballIcon className="size-4" />
-            {team.status === "full"
-              ? `Equipo completo (${TEAM_SIZE}/${TEAM_SIZE})`
-              : "Capturar"}
-          </motion.button>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-/** Explains the radar's weather logic right where the player meets it. */
-function WeatherNote({ spawn }: { spawn: RadarSpawn }) {
-  if (!spawn.boostedBy) return null;
-  const weather = WEATHER_META[spawn.boostedBy];
-  const condition = weather.label.toLowerCase();
-  return (
-    <p
-      className="mt-4 flex items-start gap-2.5 rounded-xl border px-3 py-2.5 text-sm"
-      style={{ borderColor: `${weather.color}40`, backgroundColor: `${weather.color}10` }}
-    >
-      <span style={{ color: weather.color }}>
-        <WeatherIcon kind={spawn.boostedBy} className="mt-0.5 size-4 shrink-0" />
-      </span>
-      <span className="text-white/75">
-        {spawn.isVisitor ? (
-          <>
-            <strong className="font-medium text-white">Visitante.</strong> No
-            vive en este hábitat: llegó atraído por el clima ({condition}).
-          </>
-        ) : (
-          <>
-            <strong className="font-medium text-white">Potenciado.</strong> El
-            clima actual ({condition}) favorece a su tipo.
-          </>
-        )}
-      </span>
     </p>
+  );
+}
+
+function CaptureKey({
+  status,
+  name,
+  onCatch,
+  onRelease,
+}: {
+  status: TeamStatus;
+  name: string;
+  onCatch: () => void;
+  onRelease: () => void;
+}) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      key={status}
+      initial={reduce ? false : { opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.16, ease: "easeOut" }}
+      className="h-11 min-w-0"
+    >
+      {status === "in-team" ? (
+        // Latched: the key stays sunk in while it's on the team.
+        <div className="dex-recess flex h-full items-center justify-between gap-2 rounded-xl pr-1.5 pl-3">
+          <span className="dex-font-lcd dex-lcd-text flex min-w-0 items-center gap-2 text-sm uppercase">
+            <PokeballIcon className="size-4 shrink-0" />
+            <span className="truncate">En tu equipo</span>
+          </span>
+          <button
+            type="button"
+            onClick={onRelease}
+            aria-label={`Liberar a ${name}`}
+            className={`${keyClass()} h-8 shrink-0 rounded-lg px-3 text-xs font-medium`}
+          >
+            Liberar
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={onCatch}
+          disabled={status === "full"}
+          title={status === "full" ? "Liberá a uno de tu equipo para capturar" : "Capturar (C)"}
+          className={`${GREEN_KEY} flex size-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold`}
+        >
+          <PokeballIcon className="size-[18px]" />
+          {status === "full" ? `Equipo completo` : "Capturar"}
+          {status === "available" && (
+            <kbd className="dex-font-lcd ml-1 rounded-[4px] bg-[#04281a]/15 px-1.5 py-0.5 text-[11px] leading-none max-lg:hidden">
+              C
+            </kbd>
+          )}
+        </button>
+      )}
+    </motion.div>
+  );
+}
+
+function TeamLine({ status, count, onOpenTeam }: { status: TeamStatus; count: number; onOpenTeam: () => void }) {
+  return (
+    <p className="mt-2 flex items-center gap-2 text-[12.5px] text-white/65">
+      <span className="flex gap-1" aria-hidden>
+        {Array.from({ length: TEAM_SIZE }, (_, slot) => (
+          <span
+            key={slot}
+            className={`size-2 rounded-full ${
+              slot < count ? "bg-radar shadow-[0_0_6px_rgb(92_242_165/0.6)]" : "bg-black/45 shadow-[inset_0_1px_2px_rgb(0_0_0/0.6)]"
+            }`}
+          />
+        ))}
+      </span>
+      <span className="dex-font-lcd dex-lcd-text text-xs tabular-nums">
+        {count}/{TEAM_SIZE}
+      </span>
+      <span className="min-w-0 truncate">
+        {status === "full" ? "Liberá a uno para hacer lugar." : status === "in-team" ? "Ya está en tu equipo." : "en tu equipo"}
+      </span>
+      {status === "full" && (
+        <button
+          type="button"
+          onClick={onOpenTeam}
+          className="ml-auto shrink-0 cursor-pointer text-xs font-medium text-radar underline-offset-2 hover:underline"
+        >
+          Ver equipo
+        </button>
+      )}
+    </p>
+  );
+}
+
+function Stats({ data }: { data: PokemonDetail | null }) {
+  const total = data?.stats.reduce((sum, stat) => sum + stat.value, 0) ?? 0;
+  return (
+    <Lcd className="shrink-0 px-3.5 py-2.5">
+      <h3 className="sr-only">Estadísticas base</h3>
+      <dl className="grid gap-1 max-lg:grid-cols-2 max-lg:gap-x-4 max-lg:gap-y-1.5">
+        {(data?.stats ?? PLACEHOLDER_STATS).map((stat, i) => (
+          <div key={stat.name} className="grid grid-cols-[66px_30px_1fr] items-center gap-2 text-[12.5px] max-lg:grid-cols-[58px_26px_1fr]">
+            <dt className="truncate text-white/75">{STAT_LABELS[stat.name]}</dt>
+            <dd className="dex-font-lcd dex-lcd-text text-right text-[13px] tabular-nums">{data ? stat.value : "--"}</dd>
+            <dd className="h-[7px] overflow-hidden rounded-[2px] bg-radar/8" aria-hidden>
+              {data ? (
+                <span
+                  className="bz-bar block h-full"
+                  style={{ width: `${Math.min(stat.value / MAX_STAT, 1) * 100}%`, animationDelay: `${i * 30}ms` }}
+                />
+              ) : (
+                <span className="block h-full w-1/2 animate-pulse bg-radar/12" />
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <p className="dex-font-lcd mt-2 flex justify-between border-t border-radar/15 pt-2 text-xs tracking-[0.1em] text-radar/70">
+        <span>TOTAL</span>
+        <span className="dex-lcd-text tabular-nums">{data ? total : "---"}</span>
+      </p>
+    </Lcd>
+  );
+}
+
+const PLACEHOLDER_STATS = (Object.keys(STAT_LABELS) as (keyof typeof STAT_LABELS)[]).map((name) => ({ name, value: 0 }));
+
+function Facts({ data }: { data: PokemonDetail | null }) {
+  const abilities = data?.abilities.filter((a) => !a.hidden).map((a) => a.name) ?? [];
+  const facts = [
+    { label: "Altura", value: data ? `${NUMBER.format(data.heightM)} m` : null },
+    { label: "Peso", value: data ? `${NUMBER.format(data.weightKg)} kg` : null },
+    { label: "Habilidad", value: data ? abilities.join(", ") || "—" : null },
+  ];
+  return (
+    <dl className="grid shrink-0 grid-cols-[1fr_1fr_1.4fr] gap-1.5">
+      {facts.map((fact) => (
+        <div key={fact.label} className="dex-lcd min-w-0 rounded-[10px] px-2.5 py-2">
+          <dt className={`${CART_LEGEND} text-[10px]`}>{fact.label}</dt>
+          <dd className="dex-font-lcd dex-lcd-text mt-1.5 truncate text-[15px] leading-none" title={fact.value ?? undefined}>
+            {fact.value ?? <Skeleton className="h-3.5 w-12" />}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function SignalLost({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div role="alert" className="grid place-items-center gap-2 px-4 py-6 text-center">
+      <p className="dex-font-lcd text-xs tracking-[0.14em] text-red-400 uppercase [text-shadow:0_0_8px_rgb(248_113_113/0.5)]">
+        ▲ Señal perdida
+      </p>
+      <p className="max-w-[30ch] text-sm text-white/75">
+        No pudimos leer su entrada, estadísticas y datos desde la PokéAPI. Revisá tu conexión.
+      </p>
+      <button type="button" onClick={onRetry} className={`${keyClass()} mt-1 h-9 rounded-full px-4 text-sm font-medium`}>
+        Reintentar
+      </button>
+    </div>
   );
 }
 
 function RarityBadge({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-amber-300/40 bg-amber-300/10 px-2.5 py-0.5 text-xs font-medium text-amber-200">
+    <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/45 bg-amber-300/10 px-2.5 py-0.5 text-xs font-medium text-amber-200">
       ★ {label}
     </span>
   );
 }
 
 function Skeleton({ className }: { className: string }) {
+  return <span aria-hidden className={`block animate-pulse rounded-[3px] bg-radar/12 ${className}`} />;
+}
+
+function Equalizer() {
+  const reduce = useReducedMotion();
   return (
-    <span
-      aria-hidden
-      className={`block animate-pulse rounded-md bg-white/8 ${className}`}
-    />
+    <span className="flex size-4 items-end justify-center gap-[2px]" aria-hidden>
+      {[0, 1, 2].map((bar) => (
+        <motion.span
+          key={bar}
+          className="h-full w-[3px] origin-bottom rounded-full bg-radar"
+          animate={reduce ? { scaleY: 0.7 } : { scaleY: [0.3, 1, 0.5, 0.9, 0.3] }}
+          transition={reduce ? { duration: 0 } : { duration: 0.7, repeat: Infinity, delay: bar * 0.12 }}
+        />
+      ))}
+    </span>
   );
 }
 
-/** Mirrors DetailBody's layout so nothing jumps when data arrives. */
-function DetailSkeleton() {
-  return (
-    <div role="status" aria-label="Cargando datos del Pokémon">
-      <div className="mt-5 space-y-2">
-        <Skeleton className="h-3.5 w-full" />
-        <Skeleton className="h-3.5 w-11/12" />
-        <Skeleton className="h-3.5 w-2/3" />
-      </div>
-      <Skeleton className="mt-6 h-3 w-32" />
-      <div className="mt-3 space-y-3.5">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="grid grid-cols-[5.5rem_2.25rem_1fr] items-center gap-3">
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-1.5 w-full" />
-          </div>
-        ))}
-      </div>
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        <Skeleton className="h-[4.25rem] w-full rounded-xl" />
-        <Skeleton className="h-[4.25rem] w-full rounded-xl" />
-        <Skeleton className="col-span-2 h-[4.25rem] w-full rounded-xl" />
-      </div>
-    </div>
-  );
+function joinAnd(items: readonly string[]) {
+  if (items.length <= 1) return items[0] ?? "su tipo";
+  return `${items.slice(0, -1).join(", ")} y ${items.at(-1)}`;
 }
 
-function DetailError({ onRetry }: { onRetry: () => void }) {
+export function isTyping(target: EventTarget | null) {
   return (
-    <div
-      role="alert"
-      className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/5 p-4 text-center"
-    >
-      <p className="font-mono text-[11px] tracking-wider text-red-300 uppercase">
-        Señal perdida
-      </p>
-      <p className="mt-1 text-sm text-white/65">
-        No pudimos contactar a la PokéAPI. Revisá tu conexión e intentá de nuevo.
-      </p>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="mt-3 cursor-pointer rounded-full border border-white/15 px-4 py-1.5 text-sm transition-colors hover:bg-white/10"
-      >
-        Reintentar
-      </button>
-    </div>
+    target instanceof HTMLElement &&
+    (/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName) || target.isContentEditable || target.getAttribute("role") === "slider")
   );
 }
