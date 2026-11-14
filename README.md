@@ -30,18 +30,21 @@ Encima de esa capa fija hay una **capa viva: el clima real** de cada zona (Open-
 
 **Recorrido de la experiencia**
 
+La interfaz es una **Pokédex de bolsillo** armada alrededor del mapa: una tapa con un visor LCD que dice dónde estás, una fila de teclas físicas (zona ▲▼, Rastreo, Equipo), una bahía con los seis lugares del equipo y paneles que entran como cartuchos desde los bordes de la pantalla. La primera visita abre un manual corto (se vuelve a abrir con `?`).
+
 1. Vista país: 9 zonas con un pulso de radar y el clima en vivo en cada etiqueta.
 2. Al elegir una zona, la cámara vuela (con inclinación 3D), se despliega un **radar pintado sobre el terreno** y los Pokémon "aparecen" uno a uno.
-3. Al elegir un Pokémon, se abre un panel con datos reales de la PokéAPI en español (nombre, categoría, descripción de la Pokédex, estadísticas animadas, habilidades).
-4. Se puede **capturar** hasta 6 Pokémon en el *Equipo de expedición* (se guarda entre visitas); al tocar uno, el mapa te lleva de vuelta adonde lo encontraste.
-5. Los **filtros** (tipo, generación, total de estadísticas) responden tanto a nivel país —cada zona muestra cuántos Pokémon coinciden— como dentro de una zona.
+3. Al elegir un Pokémon, se abre su ficha con datos reales de la PokéAPI en español (nombre, categoría, descripción de la Pokédex, estadísticas animadas, habilidades).
+4. Se puede **capturar** hasta 6 Pokémon en el *Equipo de expedición* (se guarda entre visitas); al tocar uno, el mapa te lleva de vuelta adonde lo encontraste. La tecla **Equipo** muestra los seis y los tipos que golpean fuerte a dos o más de ellos.
+5. **Rastreo** (el rayo) recorre los Pokémon potenciados por el clima, zona por zona.
+6. Los **filtros** (tipo, generación, total de estadísticas) responden tanto a nivel país —cada zona muestra cuántos Pokémon coinciden— como dentro de una zona.
 
 **Decisiones de UX**
 
-- `Esc` retrocede un nivel (filtros → Pokémon → zona → país).
+- `Esc` retrocede un nivel (manual → panel → Pokémon → zona → país). Atajos: `N`/`S` zona al norte/sur, `P` próximo potenciado, `F` filtros, `E` equipo, `M` grito al capturar, `?` manual; en la ficha, `C` capturar, `G` grito y `[` `]` Pokémon anterior/siguiente.
 - Usuarios con *reducir movimiento* activado reciben saltos de cámara en lugar de vuelos y un radar estático.
 - El grito del Pokémon suena **al capturarlo** (y a demanda desde el panel). Al principio sonaba cada vez que se seleccionaba uno; al probarlo resultó molesto y lo moví al momento de la captura, donde funciona como recompensa.
-- Mobile: el panel de detalle es una *bottom sheet* que se cierra arrastrándola hacia abajo; en desktop es un panel lateral y la cámara deja espacio para que no tape al Pokémon.
+- Mobile: los paneles son *bottom sheets* que se cierran arrastrándolas hacia abajo (la ficha también se expande hacia arriba). En desktop son paneles laterales —desde 1280 px la zona y la ficha conviven lado a lado— y la cámara deja espacio para que no tapen al Pokémon.
 
 ---
 
@@ -52,7 +55,7 @@ Encima de esa capa fija hay una **capa viva: el clima real** de cada zona (Open-
 | Framework | **Next.js 16 (App Router)** con *Cache Components* | Separación clara server/client y prerender con datos cacheados |
 | Mapa | **MapLibre GL 6 + OpenFreeMap** (`dark`, re-teñido) | Tiles vectoriales sin API key, `flyTo` nativo con pitch/bearing |
 | Animación | **Framer Motion** | Springs, `AnimatePresence`, drag de la bottom sheet |
-| Estilos | **Tailwind CSS v4** | Tokens de diseño en `@theme` (`radar`, `radar-bg`, `panel`) |
+| Estilos | **Tailwind CSS v4** | Utilidades + `device.css` con las piezas de la Pokédex (carcasa, visor LCD, cartuchos) bajo `.pokedex`; fuentes Chakra Petch y Share Tech Mono |
 | Datos | **PokéAPI** + **Open-Meteo** | Gratuitas, sin key |
 
 TypeScript con `strict`, `noUncheckedIndexedAccess` y `noImplicitOverride`; sin `any` en el código.
@@ -66,8 +69,11 @@ page.tsx (Server Component)
 └─ <RadarApp> (Client)    recibe datos planos y maneja toda la interacción
    ├─ useZoneWeather()    Open-Meteo, 1 request para las 9 zonas, refresco c/15 min
    ├─ applyWeather()      función pura: hábitat + clima → lo que muestra el radar
+   ├─ <Lid> <Rail> <Bay>  la carcasa: visor LCD, teclas físicas y lugares del equipo
    ├─ <MapLoader>         next/dynamic con ssr:false → <MapView> (todo lo que toca maplibre-gl)
-   └─ <PokemonDrawer>     usePokemonDetail(): fetch a PokéAPI al seleccionar, con cache y reintento
+   └─ cartuchos           <ZoneCard> · <PokemonDrawer> · <TrackPanel> · <TeamPanel> · <FilterPanel>
+                          (a la izquierda/derecha en desktop, bottom sheet en mobile)
+                          <PokemonDrawer> usa usePokemonDetail(): fetch a PokéAPI con cache y reintento
 ```
 
 - La página sale **estática** (revalida cada 24 h): las ~140 requests a la PokéAPI ocurren en build/revalidación, nunca mientras el usuario espera. Si un hábitat falla, esa zona muestra "Sin señal" y el resto sigue andando.
@@ -81,13 +87,14 @@ page.tsx (Server Component)
 src/
 ├─ app/                 layout, page (server), error boundary, icono
 ├─ components/
+│  ├─ device/           la carcasa de la Pokédex: tapa, teclas, bahía del equipo, cartucho, fuentes, CSS
 │  ├─ map/              todo lo que usa maplibre-gl (cargado sólo en cliente)
-│  ├─ pokemon/          drawer de detalle, barras de stats, badges de tipo
-│  ├─ radar/            shell de la app, tarjeta de zona, filtros, equipo, sonido
+│  ├─ pokemon/          ficha de detalle, badges de tipo
+│  ├─ radar/            shell de la app, zona, filtros, rastreo, equipo, manual
 │  ├─ weather/          íconos de clima
 │  └─ ui/               íconos y slider de rango accesible
 ├─ hooks/               detalle, clima, equipo (localStorage), media queries…
-├─ lib/                 dominio puro y compartido: zonas, clima, filtros, layout de spawns
+├─ lib/                 dominio puro y compartido: zonas, clima, filtros, layout de spawns, tabla de tipos
 │  └─ pokeapi/          fetch tipado + tipos de las respuestas usadas
 └─ server/              data fetching cacheado (server-only)
 scripts/
@@ -149,7 +156,7 @@ Con la regla de Pokémon GO, el Aconcagua a −12 °C cuenta como "despejado" y 
 - **Más zonas:** Glaciar Perito Moreno, Ushuaia, Talampaya, Esteros del Iberá; *clustering* o niveles de detalle si crece la cantidad de spawns.
 - **Links compartibles:** zona y Pokémon en la URL (`?zona=iguazu&pokemon=54`) para compartir un hallazgo.
 - **Rotación diaria** de spawns (semilla por fecha) para dar motivos de volver.
-- En el detalle: cadena evolutiva y debilidades por tipo; en el equipo, un resumen de cobertura de tipos.
+- En el detalle: cadena evolutiva y debilidades por tipo (la tabla de tipos ya existe para el análisis del equipo).
 
 **Técnico**
 - **Tests:** unitarios para la lógica pura (`classifyWeather`, `applyWeather`, `matchesFilters`, `spawnPosition`) y e2e con Playwright para los flujos principales (zona → Pokémon → captura).
